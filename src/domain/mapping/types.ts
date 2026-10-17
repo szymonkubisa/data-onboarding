@@ -34,7 +34,7 @@ export interface ApprovedMapping {
   /** Each mapped target field → the column that feeds it. */
   fieldToColumn: Readonly<Record<FieldKey, ColumnId>>;
   /** Final decisions, pending ones resolved to accepted. Kept for the export report. */
-  decisions: readonly MappingDecision[];
+  decisions: MappingDecision[];
 }
 
 export type MappingIssueSeverity = "error" | "warning";
