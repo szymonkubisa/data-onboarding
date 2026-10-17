@@ -9,6 +9,9 @@ import { stepBlocker, stepForPath } from "@/application/workflow/steps";
 /**
  * Steps depend on earlier ones. Opening /validate directly (or after a reload, since
  * nothing is persisted) sends the person back to the furthest step they can use.
+ *
+ * The page stays rendered (hidden) while redirecting: with Cache Components, Next
+ * validates that every segment renders, and step components handle missing data.
  */
 export function StepGuard({ children }: { children: ReactNode }) {
   const pathname = usePathname();
@@ -23,13 +26,17 @@ export function StepGuard({ children }: { children: ReactNode }) {
     if (blocker) router.replace(fallback);
   }, [blocker, fallback, router]);
 
-  if (blocker) {
-    return (
-      <div className="flex items-center gap-2 py-16 text-sm text-muted-foreground" role="status">
-        <LoaderCircle className="size-4 animate-spin" aria-hidden />
-        {blocker} Redirecting…
+  return (
+    <>
+      {blocker && (
+        <div className="flex items-center gap-2 py-16 text-sm text-muted-foreground" role="status">
+          <LoaderCircle className="size-4 animate-spin" aria-hidden />
+          {blocker} Redirecting…
+        </div>
+      )}
+      <div hidden={Boolean(blocker)} className="contents">
+        {children}
       </div>
-    );
-  }
-  return children;
+    </>
+  );
 }

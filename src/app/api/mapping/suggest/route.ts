@@ -7,7 +7,7 @@ import { OpenRouterSuggester } from "@/infrastructure/ai/openrouter-suggester";
 import { clientKey, RateLimiter } from "@/infrastructure/ai/rate-limit";
 import { errorResponse, logEvent, readJson } from "../http";
 
-export const runtime = "nodejs";
+// Node.js runtime is the default (and the `runtime` export is rejected with Cache Components).
 export const maxDuration = 30;
 
 const limiter = new RateLimiter(20, 60_000);

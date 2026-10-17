@@ -4,7 +4,7 @@ import { resumeMapping } from "@/infrastructure/ai/graph/run";
 import { clientKey, RateLimiter } from "@/infrastructure/ai/rate-limit";
 import { errorResponse, logEvent, readJson } from "../http";
 
-export const runtime = "nodejs";
+// Node.js runtime is the default (and the `runtime` export is rejected with Cache Components).
 export const maxDuration = 30;
 
 const limiter = new RateLimiter(60, 60_000);

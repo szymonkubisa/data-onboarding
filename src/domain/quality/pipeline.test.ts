@@ -149,3 +149,21 @@ describe("runQualityPipeline", () => {
     });
   });
 });
+
+describe("previewField", () => {
+  it("shows what a value becomes and what it would raise", async () => {
+    const { supplierSchema } = await import("../schema/supplier");
+    const { previewField } = await import("./pipeline");
+    const field = (key: string) => supplierSchema.fields.find((f) => f.key === key)!;
+    expect(previewField(field("country"), " uk ")).toEqual({
+      from: " uk ",
+      to: "United Kingdom",
+      changed: true,
+      issue: null,
+    });
+    expect(previewField(field("email"), "nope").issue).toMatchObject({ severity: "error" });
+    expect(previewField(field("website"), "acme.example").issue?.message).toMatch(
+      /https:\/\/acme\.example/,
+    );
+  });
+});

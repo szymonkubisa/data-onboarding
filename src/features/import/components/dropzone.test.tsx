@@ -1,16 +1,10 @@
-import { render, screen } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
+import { screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
-import { WorkflowProvider } from "@/application/workflow/react";
+import { renderWithWorkflow } from "../../../../test/helpers/render";
 import { ImportWorkspace } from "./import-step";
 
 function setup() {
-  const user = userEvent.setup({ applyAccept: false });
-  render(
-    <WorkflowProvider>
-      <ImportWorkspace />
-    </WorkflowProvider>,
-  );
+  const { user } = renderWithWorkflow(<ImportWorkspace />);
   const input = screen.getByLabelText("Choose a CSV or Excel file");
   return { user, input };
 }

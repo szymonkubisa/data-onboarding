@@ -292,3 +292,26 @@ export function pendingFixIds(report: QualityReport, field?: FieldKey): string[]
   }
   return ids;
 }
+
+export interface FieldPreview {
+  from: string;
+  to: string;
+  changed: boolean;
+  /** Most important issue the value would raise, if any. */
+  issue: { severity: QualityIssue["severity"]; message: string } | null;
+}
+
+/**
+ * What a raw value becomes under a field's rules, without corrections or accepted fixes.
+ * Used by the mapping screen to preview the effect of choosing a target.
+ */
+export function previewField(field: FieldDefinition, raw: string): FieldPreview {
+  const result = processField(field, raw, "preview", {});
+  const issue = result.issues.find((i) => i.severity === "error") ?? result.issues[0] ?? null;
+  return {
+    from: raw,
+    to: result.value,
+    changed: result.value !== raw,
+    issue: issue ? { severity: issue.severity, message: issue.message } : null,
+  };
+}
