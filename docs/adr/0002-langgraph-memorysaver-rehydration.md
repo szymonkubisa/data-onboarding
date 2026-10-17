@@ -23,9 +23,11 @@ START → analyseSource → generateSuggestions → validateOutput → humanRevi
 
 - `humanReview` calls `interrupt()`. The `/api/mapping/review` request resumes it with `Command({ resume: decisions })`. The resume value is validated with Zod (`responseSchema`).
 - `validateApprovedMapping` routes back to `humanReview` when required fields are missing or a target is used twice. That is a real cycle, not a linear chain.
-- The suggester is injected through `config.configurable`, so tests and demo mode swap the LLM for a fake or for heuristics without touching the graph.
+- The suggester is injected through the run's `context` (LangGraph runtime context, not `configurable`), so it is never copied into checkpoint metadata. Tests and demo mode swap the LLM for a fake or for heuristics without touching the graph.
 
-Checkpoints are stored in `MemorySaver` (bounded: oldest threads are evicted). When `/review` arrives at an instance that does not have the thread, the route **rehydrates** it: the client sends back the suggestions and column profile it got from `/suggest`, the route writes them with `graph.updateState(config, values, "validateOutput")`, and then resumes. The rehydrated state is the same state the graph would have had, because the client only ever holds a copy of graph output.
+Checkpoints are stored in `MemorySaver` (bounded: oldest threads are evicted). When `/review` arrives at an instance that does not have the thread, the route **rehydrates** it: the client sends back the suggestions and column profile it got from `/suggest`, the route runs `analyseSource` on the profile, re-validates the suggestions with the same domain rules, writes them with `graph.updateState(config, values, "validateOutput")`, and resumes. If the echoed suggestions do not survive validation, heuristics stand in and the state is written as `heuristicFallback`'s output. Either way the next node is `humanReview`. The rehydrated state is the state the graph would have had, because the client only ever holds a copy of graph output.
+
+Verified by integration tests (`src/infrastructure/ai/graph/graph.test.ts`): after `updateState`, a single `invoke(new Command({ resume }))` runs `humanReview`, which consumes the resume value immediately. The two-step fallback considered during planning (`invoke(null)` to reach the interrupt, then resume) was not needed.
 
 ## Consequences
 

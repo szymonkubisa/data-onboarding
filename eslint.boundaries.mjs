@@ -11,6 +11,7 @@
  * See docs/architecture.md for the reasoning.
  */
 const LAYER = {
+  contracts: ["@/contracts", "@/contracts/*"],
   infrastructure: ["@/infrastructure", "@/infrastructure/*"],
   application: ["@/application", "@/application/*"],
   features: ["@/features", "@/features/*"],
@@ -40,6 +41,7 @@ export const layerBoundaries = [
         "read-excel-file/*",
         "zustand",
         "zustand/*",
+        ...LAYER.contracts,
         ...LAYER.infrastructure,
         ...LAYER.application,
         ...LAYER.features,
@@ -47,6 +49,24 @@ export const layerBoundaries = [
         ...LAYER.app,
       ],
       "domain/ must stay framework-free and must not import outer layers.",
+    ),
+  },
+  {
+    // contracts: wire schemas shared by route handlers and the browser. zod + domain only.
+    files: ["src/contracts/**/*.ts"],
+    rules: restrict(
+      [
+        "react",
+        "next",
+        "next/*",
+        "@langchain/*",
+        ...LAYER.infrastructure,
+        ...LAYER.application,
+        ...LAYER.features,
+        ...LAYER.components,
+        ...LAYER.app,
+      ],
+      "contracts/ may depend on zod and domain/ only.",
     ),
   },
   {
