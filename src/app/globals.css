@@ -16,6 +16,7 @@
 
   --primary: oklch(0.47 0.085 187); /* deep teal */
   --primary-foreground: oklch(0.99 0.005 180);
+  --primary-hover: oklch(0.41 0.078 188); /* darker on hover keeps text contrast */
   --primary-soft: oklch(0.965 0.025 182);
   --primary-soft-foreground: oklch(0.4 0.075 188);
 
@@ -49,6 +50,7 @@
   --color-popover-foreground: var(--popover-foreground);
   --color-primary: var(--primary);
   --color-primary-foreground: var(--primary-foreground);
+  --color-primary-hover: var(--primary-hover);
   --color-primary-soft: var(--primary-soft);
   --color-primary-soft-foreground: var(--primary-soft-foreground);
   --color-secondary: var(--secondary);

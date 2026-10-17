@@ -80,14 +80,25 @@ function TargetSelect({
         {schema.fields.map((field) => {
           const others = (usedBy[field.key] ?? []).filter((name) => name !== column.name);
           return (
-            <SelectItem key={field.key} value={field.key}>
-              <span>{field.label}</span>
-              {field.required && <span className="text-xs text-destructive">*</span>}
-              {others.length > 0 && (
-                <span className="ml-1 truncate text-xs text-muted-foreground">
-                  used by {others[0]}
-                </span>
-              )}
+            <SelectItem
+              key={field.key}
+              value={field.key}
+              hint={
+                <>
+                  {field.required && (
+                    <span className="text-xs text-destructive" aria-label="required">
+                      *
+                    </span>
+                  )}
+                  {others.length > 0 && (
+                    <span className="ml-1 truncate text-xs text-muted-foreground">
+                      used by {others[0]}
+                    </span>
+                  )}
+                </>
+              }
+            >
+              {field.label}
             </SelectItem>
           );
         })}
@@ -331,7 +342,12 @@ export function DecisionTable({ flaggedColumns }: { flaggedColumns: ReadonlySet<
 
   return (
     <div className="overflow-hidden rounded-card border bg-card">
-      <div className="overflow-x-auto">
+      <div
+        className="relative overflow-x-auto"
+        tabIndex={0}
+        role="region"
+        aria-label="Column mapping decisions"
+      >
         <table className="w-full min-w-[760px] border-collapse text-sm">
           <caption className="sr-only">Mapping of source columns to target fields</caption>
           <thead className="bg-muted/60 text-xs text-muted-foreground">

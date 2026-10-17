@@ -79,7 +79,8 @@ export function DataTable<T extends RowData>({
 
   return (
     <div className={cn("overflow-hidden rounded-card border bg-card", className)}>
-      <div className="overflow-x-auto">
+      {/* Focusable so keyboard users can scroll wide tables (WCAG 2.1.1). */}
+      <div className="relative overflow-x-auto" tabIndex={0} role="region" aria-label={caption}>
         <table className="w-full caption-bottom border-collapse text-sm">
           <caption className="sr-only">{caption}</caption>
           <thead className="bg-muted/60">

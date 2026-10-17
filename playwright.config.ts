@@ -1,6 +1,6 @@
 import { defineConfig, devices } from "@playwright/test";
 
-const PORT = Number(process.env.E2E_PORT ?? 3100);
+const PORT = Number(process.env.E2E_PORT ?? 4317);
 const BASE_URL = `http://localhost:${PORT}`;
 
 export default defineConfig({
@@ -13,6 +13,9 @@ export default defineConfig({
     baseURL: BASE_URL,
     trace: "retain-on-failure",
     acceptDownloads: true,
+    // Animations off: axe would otherwise measure contrast mid fade-in. Also exercises
+    // the prefers-reduced-motion styles.
+    contextOptions: { reducedMotion: "reduce" },
   },
   projects: [
     {
@@ -24,7 +27,8 @@ export default defineConfig({
     // Production build, no API key in env → demo mode (heuristic suggestions).
     command: `pnpm build && pnpm start --port ${PORT}`,
     url: BASE_URL,
-    reuseExistingServer: !process.env.CI,
+    // Always our own production build: a dev server or another app on the port would skew results.
+    reuseExistingServer: false,
     timeout: 240_000,
     env: { OPENROUTER_API_KEY: "" },
   },

@@ -177,7 +177,7 @@ export function MappingStep() {
         )}
         <ReviewIssues issues={review.issues.length > 0 ? review.issues : warnings} />
         <SummaryBar />
-        <div className="grid items-start gap-4 lg:grid-cols-[minmax(0,1fr)_300px]">
+        <div className="grid grid-cols-1 items-start gap-4 lg:grid-cols-[minmax(0,1fr)_300px]">
           <DecisionTable flaggedColumns={flagged} />
           <FieldCoverage />
         </div>
