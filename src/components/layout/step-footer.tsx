@@ -13,6 +13,8 @@ export interface FooterAction {
   /** When set, the action is disabled and this text says why (tooltip + screen reader). */
   disabledReason?: string | null;
   loading?: boolean;
+  /** Trailing icon. Defaults to an arrow (moves to the next step). */
+  icon?: ReactNode;
 }
 
 /**
@@ -50,13 +52,13 @@ export function StepFooter({
       {next.href && !disabled ? (
         <Link href={next.href}>
           {next.label}
-          <ArrowRight data-icon="inline-end" />
+          {next.icon ?? <ArrowRight data-icon="inline-end" />}
         </Link>
       ) : (
         <>
           {next.loading ? <LoaderCircle className="animate-spin" data-icon="inline-start" /> : null}
           {next.label}
-          {!next.loading && <ArrowRight data-icon="inline-end" />}
+          {!next.loading && (next.icon ?? <ArrowRight data-icon="inline-end" />)}
         </>
       )}
     </Button>

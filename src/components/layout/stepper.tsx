@@ -46,7 +46,9 @@ export function Stepper() {
               <span
                 className={cn(
                   "text-sm",
-                  status === "current" ? "font-medium text-foreground" : "text-muted-foreground",
+                  status === "current"
+                    ? "font-medium text-foreground"
+                    : "sr-only text-muted-foreground sm:not-sr-only",
                 )}
               >
                 {step.label}

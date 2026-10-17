@@ -367,6 +367,7 @@ export function ExportStep() {
         next={{
           label: "Download CSV",
           onClick: downloadCsv,
+          icon: <Download data-icon="inline-end" />,
           disabledReason: included === 0 ? "There are no rows to export." : null,
         }}
       />
