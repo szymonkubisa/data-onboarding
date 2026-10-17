@@ -41,6 +41,12 @@ describe("buildDataset", () => {
     );
   });
 
+  it("drops trailing blank rows silently (trailing newline, formatted Excel rows)", () => {
+    const ds = ok(build([["Name"], ["A"], [""], ["", ""]]));
+    expect(ds.rows).toHaveLength(1);
+    expect(ds.warnings).toEqual([]);
+  });
+
   it("removes columns with no header and no values, keeps headerless columns with values", () => {
     const ds = ok(
       build([

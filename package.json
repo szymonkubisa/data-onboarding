@@ -14,7 +14,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "e2e": "playwright test",
-    "generate:sample": "tsx scripts/generate-sample.ts"
+    "generate:sample": "tsx scripts/generate-sample.mts"
   },
   "dependencies": {
     "@langchain/core": "1.2.18",

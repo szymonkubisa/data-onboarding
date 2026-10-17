@@ -31,7 +31,8 @@ export type DatasetWarningCode =
   | "rows-truncated"
   | "columns-truncated"
   | "extra-cells"
-  | "multiple-sheets";
+  | "multiple-sheets"
+  | "encoding-suspect";
 
 export interface DatasetWarning {
   code: DatasetWarningCode;

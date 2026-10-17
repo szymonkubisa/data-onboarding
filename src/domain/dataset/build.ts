@@ -51,6 +51,9 @@ export function buildDataset(input: BuildDatasetInput): DatasetResult {
   const warnings: DatasetWarning[] = [...(input.extraWarnings ?? [])];
 
   const matrix = input.matrix.map((row) => row.map(cellToString));
+  // Blank rows at the very end (a trailing newline, Excel's formatted-but-empty rows) are
+  // not data the person typed, so they are dropped without a warning.
+  while (matrix.length > 0 && matrix[matrix.length - 1]!.every(isBlank)) matrix.pop();
   const headerIndex = matrix.findIndex((row) => row.some((cell) => !isBlank(cell)));
   if (headerIndex === -1) {
     return { ok: false, error: { code: "empty-file", message: "The file is empty." } };
@@ -65,8 +68,7 @@ export function buildDataset(input: BuildDatasetInput): DatasetResult {
   let removedEmpty = 0;
   for (let c = 0; c < width; c += 1) {
     const hasHeader = !isBlank(headerCells[c] ?? "");
-    const hasValues = hasHeader || dataMatrix.some((row) => !isBlank(row[c] ?? ""));
-    if (hasHeader || hasValues) keptIndexes.push(c);
+    if (hasHeader || dataMatrix.some((row) => !isBlank(row[c] ?? ""))) keptIndexes.push(c);
     else removedEmpty += 1;
   }
   if (removedEmpty > 0) {

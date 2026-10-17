@@ -25,7 +25,12 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     <html lang="en" className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}>
       <body className="flex min-h-full flex-col">
         <TooltipProvider delayDuration={200}>{children}</TooltipProvider>
-        <Toaster position="bottom-right" />
+        {/* Lifted above the sticky step footer. */}
+        <Toaster
+          position="bottom-right"
+          offset={{ bottom: 84, right: 16 }}
+          mobileOffset={{ bottom: 80 }}
+        />
       </body>
     </html>
   );
