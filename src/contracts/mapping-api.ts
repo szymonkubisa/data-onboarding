@@ -57,7 +57,12 @@ export const SuggestRequestSchema = z.object({
   samples: SamplesSchema.optional(),
 });
 
-export const FallbackReasonSchema = z.enum(["demo-mode", "provider-error", "invalid-output"]);
+export const FallbackReasonSchema = z.enum([
+  "demo-mode",
+  "provider-error",
+  "timeout",
+  "invalid-output",
+]);
 
 export const SuggestResponseSchema = z.object({
   threadId: z.string().min(1),

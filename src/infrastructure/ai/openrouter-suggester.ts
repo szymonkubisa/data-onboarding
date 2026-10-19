@@ -2,7 +2,7 @@ import "server-only";
 import type { BaseChatModel } from "@langchain/core/language_models/chat_models";
 import { HumanMessage, SystemMessage } from "@langchain/core/messages";
 import { ChatOpenAI } from "@langchain/openai";
-import { buildLlmOutputJsonSchema } from "@/domain/mapping/schemas";
+import { buildLlmOutputSchema } from "@/domain/mapping/schemas";
 import { buildMappingUserPrompt, MAPPING_SYSTEM_PROMPT } from "./prompts/mapping";
 import { SuggesterError, type MappingSuggester, type SuggestInput } from "./suggester";
 
@@ -15,11 +15,18 @@ export interface OpenRouterOptions {
   chatModel?: BaseChatModel;
   /** "jsonSchema" for providers that enforce a response schema; "functionCalling" otherwise. */
   method?: "jsonSchema" | "functionCalling";
+  /** HTTP override, for tests that inspect the exact request sent to OpenRouter. */
+  fetch?: typeof fetch;
+  /** OpenRouter's unified `reasoning.effort`; "off" (or unset) sends no reasoning parameter. */
+  reasoningEffort?: "off" | "minimal" | "low" | "medium" | "high";
 }
 
-/** Output budget grows with the number of columns: roughly one short sentence each. */
+/**
+ * Token budget grows with the number of columns (one short sentence each). Reasoning models
+ * spend part of `max_tokens` on thinking, hence the generous base.
+ */
 export function maxTokensFor(columnCount: number): number {
-  return Math.min(8192, 512 + columnCount * 64);
+  return Math.min(16_384, 2_048 + columnCount * 96);
 }
 
 /**
@@ -42,22 +49,28 @@ export class OpenRouterSuggester implements MappingSuggester {
       temperature: 0,
       maxRetries: 1,
       maxTokens: maxTokensFor(columnCount),
-      timeout: this.options.timeoutMs ?? 25_000,
+      // The graph gives each attempt its own abort signal; this is only a hard ceiling.
+      timeout: this.options.timeoutMs ?? 60_000,
+      ...(this.options.reasoningEffort && this.options.reasoningEffort !== "off"
+        ? { modelKwargs: { reasoning: { effort: this.options.reasoningEffort } } }
+        : {}),
       configuration: {
         baseURL: this.options.baseURL,
         defaultHeaders: { "X-Title": "Data Onboarding" },
+        ...(this.options.fetch ? { fetch: this.options.fetch } : {}),
       },
     });
   }
 
   async suggest(input: SuggestInput, { signal }: { signal?: AbortSignal } = {}): Promise<unknown> {
-    const schema = buildLlmOutputJsonSchema(
+    const schema = buildLlmOutputSchema(
       input.columns.map((c) => c.id),
       input.schema.fields.map((f) => f.key),
     );
     const structured = this.chatModel(input.columns.length).withStructuredOutput(schema, {
       name: "column_mapping",
       method: this.options.method ?? "jsonSchema",
+      strict: true,
     });
     try {
       return await structured.invoke(
@@ -80,9 +93,32 @@ function classify(error: unknown, signal?: AbortSignal): SuggesterError {
   ) {
     return new SuggesterError("invalid-output", "The answer was not valid JSON.");
   }
-  // Provider messages can echo request details; keep only the class and status.
-  const status =
-    typeof error === "object" && error && "status" in error ? ` (${String(error.status)})` : "";
+  return new SuggesterError("provider", describeProviderError(error));
+}
+
+/**
+ * Server-log description of a provider failure: error class, HTTP status, the provider's
+ * error code and offending parameter, and the first part of its message. Provider messages
+ * describe the request parameters (model, temperature, response_format), not row data, which
+ * never reaches the server in the first place.
+ */
+export function describeProviderError(error: unknown): string {
+  const e = (typeof error === "object" && error ? error : {}) as Record<string, unknown>;
   const name = error instanceof Error ? error.name : "UnknownError";
-  return new SuggesterError("provider", `Model provider error: ${name}${status}.`);
+  const parts = [
+    e.status,
+    e.code && `code=${String(e.code)}`,
+    e.param && `param=${String(e.param)}`,
+  ]
+    .filter(Boolean)
+    .map(String);
+  // OpenRouter wraps upstream failures as "Provider returned error"; the upstream reason is in
+  // error.metadata.raw, and which provider answered in error.metadata.provider_name.
+  const body = (e.error ?? {}) as { metadata?: { raw?: unknown; provider_name?: unknown } };
+  const upstream = body.metadata?.raw
+    ? ` [${String(body.metadata.provider_name ?? "upstream")}: ${String(body.metadata.raw)}]`
+    : "";
+  const message = error instanceof Error ? error.message : "";
+  const text = `${message}${upstream}`.replace(/\s+/g, " ").slice(0, 400);
+  return `Model provider error: ${name}${parts.length ? ` (${parts.join(", ")})` : ""}${text ? `: ${text}` : "."}`;
 }

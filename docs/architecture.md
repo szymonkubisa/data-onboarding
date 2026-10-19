@@ -103,12 +103,12 @@ Checkpointing, rehydration and the production path are in [ADR 0002](adr/0002-la
 
 ## Limits
 
-| Limit                       | Value                            |
-| --------------------------- | -------------------------------- |
-| File size                   | 10 MB                            |
-| Rows                        | 20 000                           |
-| Columns                     | 150                              |
-| Header length               | 200 characters                   |
-| Samples sent to AI (opt-in) | 3 per column, 60 characters each |
-| Request body                | 256 KB                           |
-| Model call                  | 25 s timeout, 1 retry            |
+| Limit                       | Value                                                                                     |
+| --------------------------- | ----------------------------------------------------------------------------------------- |
+| File size                   | 10 MB                                                                                     |
+| Rows                        | 20 000                                                                                    |
+| Columns                     | 150                                                                                       |
+| Header length               | 200 characters                                                                            |
+| Samples sent to AI (opt-in) | 3 per column, 60 characters each                                                          |
+| Request body                | 256 KB                                                                                    |
+| Model attempt               | 30 s, at most 2 attempts within a 50 s request budget; a timeout falls back to heuristics |

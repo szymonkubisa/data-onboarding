@@ -1,5 +1,5 @@
 import { describe, expect, expectTypeOf, it } from "vitest";
-import type { z } from "zod";
+import { z } from "zod";
 import { supplierSchema } from "../schema/supplier";
 import {
   buildApprovedMapping,
@@ -11,7 +11,7 @@ import {
   validateMapping,
 } from "./rules";
 import type { MappingDecisionSchema, MappingIssueSchema, MappingSuggestionSchema } from "./schemas";
-import { buildLlmOutputJsonSchema } from "./schemas";
+import { buildLlmOutputSchema } from "./schemas";
 import type { MappingDecision, MappingIssue, MappingSuggestion } from "./types";
 
 const columnIds = ["c-001", "c-002", "c-003", "c-004"];
@@ -274,10 +274,24 @@ describe("decisions → approved mapping", () => {
   });
 });
 
-describe("buildLlmOutputJsonSchema", () => {
+describe("buildLlmOutputSchema", () => {
+  const schema = buildLlmOutputSchema(["c-001", "c-002"], ["email", "city"]);
+
   it("constrains column ids and field keys to enums", () => {
-    const schema = JSON.stringify(buildLlmOutputJsonSchema(["c-001", "c-002"], ["email", "city"]));
-    expect(schema).toContain('"enum":["c-001","c-002"]');
-    expect(schema).toContain('"email"');
+    const json = JSON.stringify(z.toJSONSchema(schema));
+    expect(json).toContain('"enum":["c-001","c-002"]');
+    expect(json).toContain('"email"');
+  });
+
+  it("is closed at every level and has no numeric bounds (strict structured output)", () => {
+    const json = z.toJSONSchema(schema) as unknown as {
+      additionalProperties: unknown;
+      properties: { mappings: { items: Record<string, unknown> } };
+    };
+    const item = json.properties.mappings.items;
+    expect(json.additionalProperties).toBe(false);
+    expect(item.additionalProperties).toBe(false);
+    expect(item.required).toEqual(["sourceColumnId", "targetField", "confidence", "reasoning"]);
+    expect(JSON.stringify(json)).not.toMatch(/"(minimum|maximum)"/);
   });
 });

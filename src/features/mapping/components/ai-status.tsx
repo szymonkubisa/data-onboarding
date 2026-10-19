@@ -41,6 +41,11 @@ function OriginLine() {
       tone: "text-warning",
       text: "The AI provider did not answer, so these suggestions come from heuristics.",
     },
+    timeout: {
+      icon: TriangleAlert,
+      tone: "text-warning",
+      text: "The AI model took too long to answer, so these suggestions come from heuristics.",
+    },
     "invalid-output": {
       icon: TriangleAlert,
       tone: "text-warning",

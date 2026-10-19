@@ -91,25 +91,27 @@ export const RawMappingOutputSchema = z.object({
 export type RawMappingOutput = z.infer<typeof RawMappingOutputSchema>;
 
 /**
- * JSON Schema handed to the LLM for structured output. Tighter than the raw schema:
- * column ids and field keys are enums, so a provider that enforces the schema
- * cannot invent them. Providers that do not enforce it are caught by validation.
+ * Schema handed to the LLM for structured output. Tighter than the raw schema: column ids
+ * and field keys are enums, so a provider that enforces the schema cannot invent them.
+ * Providers that do not enforce it are caught by validation.
+ *
+ * Shaped for strict structured-output modes (OpenAI / Azure `strict: true`): closed objects,
+ * every property required, no numeric bounds (some providers reject them; the 0..1 range is
+ * stated in the description and enforced by `normalizeSuggestions`). Passed to LangChain as
+ * Zod, not JSON Schema: LangChain's JSON Schema path drops `additionalProperties: false`,
+ * which strict mode rejects.
  */
-export function buildLlmOutputJsonSchema(
-  columnIds: readonly string[],
-  fieldKeys: readonly string[],
-) {
-  const schema = z.object({
+export function buildLlmOutputSchema(columnIds: readonly string[], fieldKeys: readonly string[]) {
+  return z.strictObject({
     mappings: z
       .array(
-        z.object({
+        z.strictObject({
           sourceColumnId: z.enum(columnIds as [string, ...string[]]),
           targetField: z.enum(fieldKeys as [string, ...string[]]).nullable(),
-          confidence: z.number().min(0).max(1),
+          confidence: z.number().describe("Estimate from 0 to 1 that the mapping is right."),
           reasoning: z.string(),
         }),
       )
       .describe("One entry per source column."),
   });
-  return z.toJSONSchema(schema, { target: "draft-7" });
 }

@@ -11,7 +11,7 @@ import { getSchema, isSchemaId } from "@/domain/schema/registry";
 import type { MappingSuggester } from "../suggester";
 import { BoundedMemorySaver } from "./checkpointer";
 import { buildMappingGraph, type MappingGraph } from "./graph";
-import { analyseSource, heuristicFallback } from "./nodes";
+import { analyseSource, heuristicFallback, type AttemptBudget } from "./nodes";
 import type { MappingStateType } from "./state";
 
 /** One graph per server instance. Threads live in memory; see checkpointer.ts. */
@@ -27,20 +27,26 @@ const threadConfig = (threadId: string) => ({ configurable: { thread_id: threadI
 export interface RunStats {
   attempts: number;
   repairs: number;
+  /** Why the provider call failed (class, status, provider code), when it did. */
+  providerError: string | null;
 }
 
 export async function startMapping(args: {
   request: SuggestRequest;
   suggester: MappingSuggester;
   threadId?: string;
+  /** Aborts the whole run (the client went away). Not a timeout: see `deadline`. */
   signal?: AbortSignal;
+  /** Epoch ms by which the answer is due; model attempts are budgeted against it. */
+  deadline?: number;
+  budget?: AttemptBudget;
   graph?: MappingGraph;
 }): Promise<{ response: SuggestResponse; stats: RunStats }> {
   const g = args.graph ?? graph();
   const threadId = args.threadId ?? crypto.randomUUID();
   const config = {
     ...threadConfig(threadId),
-    context: { suggester: args.suggester },
+    context: { suggester: args.suggester, deadline: args.deadline, budget: args.budget },
     signal: args.signal,
   };
 
@@ -61,7 +67,7 @@ export async function startMapping(args: {
       model: state.origin === "llm" ? state.model : null,
       fallbackReason: state.fallbackReason,
     },
-    stats: { attempts: state.attempt, repairs: state.repairs },
+    stats: { attempts: state.attempt, repairs: state.repairs, providerError: state.providerError },
   };
 }
 

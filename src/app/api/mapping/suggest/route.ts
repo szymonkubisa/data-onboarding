@@ -8,7 +8,13 @@ import { clientKey, RateLimiter } from "@/infrastructure/ai/rate-limit";
 import { errorResponse, logEvent, readJson } from "../http";
 
 // Node.js runtime is the default (and the `runtime` export is rejected with Cache Components).
-export const maxDuration = 30;
+export const maxDuration = 60;
+
+/**
+ * Answer within this much time. Model attempts (30 s each) are budgeted against it, and a
+ * slow model falls back to heuristics, so the person always gets suggestions.
+ */
+const REQUEST_BUDGET_MS = 50_000;
 
 const limiter = new RateLimiter(20, 60_000);
 
@@ -34,6 +40,7 @@ export async function POST(request: Request) {
           apiKey: config.apiKey,
           model: config.model,
           baseURL: config.baseURL,
+          reasoningEffort: config.reasoningEffort,
         })
       : new HeuristicSuggester();
 
@@ -42,7 +49,9 @@ export async function POST(request: Request) {
     const { response, stats } = await startMapping({
       request: body.data,
       suggester,
-      signal: AbortSignal.timeout(25_000),
+      // Only a client disconnect aborts the run; time limits apply per model attempt.
+      signal: request.signal,
+      deadline: started + REQUEST_BUDGET_MS,
     });
     logEvent("mapping.suggest", {
       columns: body.data.profile.length,
@@ -51,6 +60,7 @@ export async function POST(request: Request) {
       fallbackReason: response.fallbackReason,
       attempts: stats.attempts,
       repairs: stats.repairs,
+      providerError: stats.providerError,
       ms: Date.now() - started,
     });
     return Response.json(response);

@@ -102,7 +102,7 @@ describe("mapping graph", () => {
       "country",
       null,
     ]);
-    expect(stats).toEqual({ attempts: 1, repairs: 0 });
+    expect(stats).toEqual({ attempts: 1, repairs: 0, providerError: null });
     expect(inputs[0]?.hints).toEqual([
       { columnId: "c-001", field: "companyName" },
       { columnId: "c-002", field: "email" },
@@ -179,9 +179,10 @@ describe("mapping graph", () => {
     const { suggester, inputs } = scripted(
       new SuggesterError("provider", "Model provider error: APIError (502)."),
     );
-    const { response } = await startMapping({ request, suggester, graph });
+    const { response, stats } = await startMapping({ request, suggester, graph });
     expect(inputs).toHaveLength(1);
     expect(response).toMatchObject({ origin: "heuristic", fallbackReason: "provider-error" });
+    expect(stats.providerError).toBe("Model provider error: APIError (502).");
   });
 
   it("repairs usable output instead of retrying", async () => {
@@ -342,5 +343,59 @@ describe("BoundedMemorySaver", () => {
     expect((await graph.getState({ configurable: { thread_id: "c" } })).next).toEqual([
       "humanReview",
     ]);
+  });
+});
+
+describe("model time budget", () => {
+  /** Never answers; rejects like the OpenRouter adapter when its signal aborts. */
+  const silent: MappingSuggester = {
+    origin: "llm",
+    model: "slow/model",
+    suggest: (_input, options) =>
+      new Promise((_resolve, reject) => {
+        options?.signal?.addEventListener("abort", () =>
+          reject(new SuggesterError("timeout", "The model did not answer in time.")),
+        );
+      }),
+  };
+
+  it("falls back to heuristics when the model is too slow, instead of failing the request", async () => {
+    const { response, stats } = await startMapping({
+      request,
+      suggester: silent,
+      graph: freshGraph(),
+      budget: { attemptMs: 50, minAttemptMs: 10, reserveMs: 0 },
+    });
+    expect(response).toMatchObject({ origin: "heuristic", fallbackReason: "timeout" });
+    expect(response.suggestions.find((s) => s.sourceColumnId === "c-002")?.targetField).toBe(
+      "email",
+    );
+    expect(stats).toMatchObject({
+      attempts: 1,
+      providerError: "The model did not answer in time.",
+    });
+  });
+
+  it("skips a retry that would not fit before the deadline", async () => {
+    const calls: number[] = [];
+    const slowGarbage: MappingSuggester = {
+      origin: "llm",
+      model: "slow/model",
+      suggest: async () => {
+        calls.push(Date.now());
+        await new Promise((resolve) => setTimeout(resolve, 300));
+        return { nonsense: true };
+      },
+    };
+    const { response, stats } = await startMapping({
+      request,
+      suggester: slowGarbage,
+      graph: freshGraph(),
+      deadline: Date.now() + 500,
+      budget: { attemptMs: 1_000, minAttemptMs: 300, reserveMs: 0 },
+    });
+    expect(calls).toHaveLength(1);
+    expect(stats.attempts).toBe(2);
+    expect(response).toMatchObject({ origin: "heuristic", fallbackReason: "timeout" });
   });
 });

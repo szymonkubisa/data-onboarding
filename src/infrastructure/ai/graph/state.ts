@@ -33,6 +33,7 @@ export const MappingState = Annotation.Root({
   raw: value<unknown>(() => null),
   parseError: value<string | null>(() => null),
   providerError: value<string | null>(() => null),
+  providerErrorKind: value<"timeout" | "provider" | null>(() => null),
   problems: value<string[]>(() => []),
   repairs: value<number>(() => 0),
 

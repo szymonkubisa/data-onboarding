@@ -17,8 +17,31 @@ import type { MappingStateType, MappingStateUpdate, ReviewInterrupt } from "./st
 /** One retry after an invalid answer, then heuristics. */
 export const MAX_ATTEMPTS = 2;
 
+/**
+ * Time budget for model attempts. Each attempt gets its own timeout, cut to what is left
+ * before the request deadline. A slow model therefore ends in the heuristic fallback, never
+ * in an aborted request.
+ */
+export interface AttemptBudget {
+  /** Longest a single model attempt may take. */
+  attemptMs: number;
+  /** An attempt with less time than this is not started. */
+  minAttemptMs: number;
+  /** Kept for heuristics and the response after the last attempt. */
+  reserveMs: number;
+}
+
+export const DEFAULT_BUDGET: AttemptBudget = {
+  attemptMs: 30_000,
+  minAttemptMs: 8_000,
+  reserveMs: 2_000,
+};
+
 export interface MappingContext {
   suggester: MappingSuggester;
+  /** Epoch ms by which the request must be answered. No deadline: attempts are only capped. */
+  deadline?: number;
+  budget?: AttemptBudget;
 }
 
 type NodeConfig = LangGraphRunnableConfig & { context?: Partial<MappingContext> };
@@ -53,6 +76,7 @@ export function analyseSource(state: MappingStateType): MappingStateUpdate {
     problems: [],
     parseError: null,
     providerError: null,
+    providerErrorKind: null,
   };
 }
 
@@ -64,6 +88,23 @@ export async function generateSuggestions(
   if (!suggester) throw new Error("No suggester in graph context.");
   const schema = schemaOf(state);
   const attempt = state.attempt + 1;
+
+  const budget = config.context?.budget ?? DEFAULT_BUDGET;
+  const left =
+    (config.context?.deadline ?? Number.POSITIVE_INFINITY) - Date.now() - budget.reserveMs;
+  const timeoutMs = Math.min(budget.attemptMs, left);
+  if (timeoutMs < budget.minAttemptMs) {
+    return {
+      attempt,
+      providerError: "No time left for another model attempt.",
+      providerErrorKind: "timeout",
+      model: suggester.model,
+    };
+  }
+  // The attempt's own timeout, plus the run's signal (the client went away).
+  const timeout = AbortSignal.timeout(timeoutMs);
+  const signal = config.signal ? AbortSignal.any([config.signal, timeout]) : timeout;
+
   try {
     const raw = await suggester.suggest(
       {
@@ -72,13 +113,14 @@ export async function generateSuggestions(
         hints: state.hints,
         previousProblems: state.problems,
       },
-      { signal: config.signal },
+      { signal },
     );
     return {
       raw,
       attempt,
       parseError: null,
       providerError: null,
+      providerErrorKind: null,
       origin: suggester.origin,
       model: suggester.model,
     };
@@ -89,11 +131,18 @@ export async function generateSuggestions(
         attempt,
         parseError: error.message,
         providerError: null,
+        providerErrorKind: null,
         model: suggester.model,
       };
     }
-    const message = error instanceof Error ? error.message : "Unknown error";
-    return { attempt, providerError: message, model: suggester.model };
+    const timedOut =
+      (error instanceof SuggesterError && error.kind === "timeout") || timeout.aborted;
+    return {
+      attempt,
+      providerError: error instanceof Error ? error.message : "Unknown error",
+      providerErrorKind: timedOut ? "timeout" : "provider",
+      model: suggester.model,
+    };
   }
 }
 
@@ -151,7 +200,11 @@ export function heuristicFallback(state: MappingStateType): MappingStateUpdate {
   return {
     suggestions: result.suggestions,
     origin: "heuristic",
-    fallbackReason: state.providerError ? "provider-error" : "invalid-output",
+    fallbackReason: !state.providerError
+      ? "invalid-output"
+      : state.providerErrorKind === "timeout"
+        ? "timeout"
+        : "provider-error",
     problems: [],
   };
 }

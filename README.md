@@ -40,7 +40,7 @@ pnpm dev
 
 Open http://localhost:3000 and click **Try with sample data**.
 
-To use a real model, copy `.env.example` to `.env.local` and set `OPENROUTER_API_KEY`. `OPENROUTER_MODEL` defaults to `anthropic/claude-haiku-5.5`; any OpenRouter model with structured-output support works.
+To use a real model, copy `.env.example` to `.env.local` and set `OPENROUTER_API_KEY`, then restart the dev server. `OPENROUTER_MODEL` defaults to `anthropic/claude-haiku-5.5`; any OpenRouter model with structured-output support works. For reasoning models, `OPENROUTER_REASONING_EFFORT` (default `low`, or `off`) keeps answers within the time budget.
 
 ### Scripts
 
@@ -99,7 +99,7 @@ Every change is recorded with `from` and `to`. The source file is never modified
 - **No upload.** Files are parsed and processed in the browser. The server receives column profiles and, with consent, at most 3 × 60 characters per column.
 - **Formula injection (CWE-1236).** Exported cells starting with `=`, `@`, tab or CR are prefixed with `'`. Cells starting with `+` or `-` are escaped only if they contain anything beyond digits, spaces and `+ - ( ) . , /`, so `-12.5` and `+44 20 7946 0000` stay intact while `+Plus Supplies Ltd` and `-cmd|' /C calc'!A0` are neutralized. See [`formula.ts`](src/domain/export/formula.ts).
 - **Prompt injection.** Headers and samples are JSON-encoded data in the prompt, the system prompt says to treat them as data, the output schema constrains column ids and field keys to enums, and every answer is validated before use.
-- **API surface.** Zod-validated bodies with a 256 KB cap, a 25 s model timeout with one retry, a per-IP rate limit, and logs that contain counts and error codes only. The API key is read on the server (`server-only`) and never sent to the browser.
+- **API surface.** Zod-validated bodies with a 256 KB cap, 30 s per model attempt within a 50 s request budget (a slow model falls back to heuristics instead of failing the request), a per-IP rate limit, and logs that contain counts and error codes only. The API key is read on the server (`server-only`) and never sent to the browser.
 
 ## Testing
 
