@@ -111,10 +111,21 @@ describe("parseFile", () => {
 });
 
 describe("readWorkbook", () => {
-  it("keeps numbers as the stored string", async () => {
-    const result = await readWorkbook(
-      readFileSync(join(FIXTURES, "suppliers.xlsx")).buffer as ArrayBuffer,
-    );
+  it("reads an ArrayBuffer holding exactly the file's bytes", async () => {
+    // A Node Buffer's .buffer is the backing store, which can be larger than the file and
+    // start at an offset; hand the parser only the file's own bytes, as the browser does.
+    const file = readFileSync(join(FIXTURES, "suppliers.xlsx"));
+    const bytes = file.buffer.slice(
+      file.byteOffset,
+      file.byteOffset + file.byteLength,
+    ) as ArrayBuffer;
+    const result = await readWorkbook(bytes);
     expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.sheets.map((s) => [s.name, s.nonEmptyRows])).toEqual([
+      ["Suppliers", 41],
+      ["Read me", 2],
+    ]);
+    expect(result.sheets[0]?.matrix[0]?.[0]).toBe("Company");
   });
 });

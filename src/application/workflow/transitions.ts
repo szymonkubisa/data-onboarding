@@ -60,10 +60,19 @@ function withDecisions(
  * Import
  * --------------------------------------------------------------------------------------------- */
 
+/**
+ * A fresh state that keeps the AI request counter. Request ids only ever grow, across file
+ * changes, schema changes and resets: a late answer to a request made for an earlier file
+ * must never match the id of a request made for the current one.
+ */
+function freshState(state: WorkflowState): WorkflowState {
+  return { ...initialState(), ai: { ...IDLE_AI, requestId: state.ai.requestId } };
+}
+
 /** A new dataset resets everything downstream. Schema choice and consent are kept. */
 export function loadDataset(state: WorkflowState, dataset: SourceDataset): WorkflowState {
   return {
-    ...initialState(),
+    ...freshState(state),
     schemaId: state.schemaId,
     sampleConsent: state.sampleConsent,
     dataset,
@@ -78,11 +87,11 @@ export function setSchema(state: WorkflowState, schemaId: SchemaId): WorkflowSta
 function loadDatasetOrReset(state: WorkflowState): WorkflowState {
   return state.dataset
     ? loadDataset(state, state.dataset)
-    : { ...initialState(), sampleConsent: state.sampleConsent };
+    : { ...freshState(state), sampleConsent: state.sampleConsent };
 }
 
-export function reset(): WorkflowState {
-  return initialState();
+export function reset(state: WorkflowState): WorkflowState {
+  return freshState(state);
 }
 
 /* ------------------------------------------------------------------------------------------------
