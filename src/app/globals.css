@@ -1,0 +1,113 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+/*
+ * Design tokens. Light theme only (see README → Known limitations).
+ * Neutral: warm stone. One accent: deep teal. Muted semantic colors.
+ */
+:root {
+  --background: oklch(0.985 0.001 106.423); /* stone-50 */
+  --foreground: oklch(0.216 0.006 56.043); /* stone-900, charcoal */
+  --card: oklch(1 0 0);
+  --card-foreground: var(--foreground);
+  --popover: oklch(1 0 0);
+  --popover-foreground: var(--foreground);
+
+  --primary: oklch(0.47 0.085 187); /* deep teal */
+  --primary-foreground: oklch(0.99 0.005 180);
+  --primary-hover: oklch(0.41 0.078 188); /* darker on hover keeps text contrast */
+  --primary-soft: oklch(0.965 0.025 182);
+  --primary-soft-foreground: oklch(0.4 0.075 188);
+
+  --secondary: oklch(0.97 0.001 106.424); /* stone-100 */
+  --secondary-foreground: oklch(0.268 0.007 34.298);
+  --muted: oklch(0.97 0.001 106.424);
+  --muted-foreground: oklch(0.5 0.012 58); /* between stone-500 and 600, AA on white and stone-50 */
+  --accent: oklch(0.955 0.003 80);
+  --accent-foreground: oklch(0.216 0.006 56.043);
+
+  --success: oklch(0.5 0.11 160);
+  --success-soft: oklch(0.975 0.022 166);
+  --warning: oklch(0.52 0.13 55);
+  --warning-soft: oklch(0.985 0.03 90);
+  --destructive: oklch(0.52 0.19 27);
+  --destructive-soft: oklch(0.97 0.014 17);
+
+  --border: oklch(0.923 0.003 48.717); /* stone-200 */
+  --input: oklch(0.88 0.005 56);
+  --ring: oklch(0.6 0.09 186);
+
+  --radius: 0.5rem; /* controls: 8px */
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary-hover: var(--primary-hover);
+  --color-primary-soft: var(--primary-soft);
+  --color-primary-soft-foreground: var(--primary-soft-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-success: var(--success);
+  --color-success-soft: var(--success-soft);
+  --color-warning: var(--warning);
+  --color-warning-soft: var(--warning-soft);
+  --color-destructive: var(--destructive);
+  --color-destructive-soft: var(--destructive-soft);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+  --font-heading: var(--font-geist-sans);
+
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-card: 0.8125rem; /* cards: 13px */
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  html {
+    @apply font-sans;
+    color-scheme: light;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+  button:not(:disabled),
+  [role="button"]:not(:disabled) {
+    cursor: pointer;
+  }
+  :focus-visible {
+    @apply outline-2 outline-offset-2 outline-ring;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
