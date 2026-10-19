@@ -53,7 +53,7 @@ export function createWorkflowStore(preloaded: Partial<WorkflowState> = {}): Wor
       actions: {
         loadDataset: apply(t.loadDataset),
         setSchema: apply(t.setSchema),
-        reset: () => set(t.reset()),
+        reset: apply(t.reset),
         setSampleConsent: apply(t.setSampleConsent),
         suggestStarted: () => {
           set((state) => t.suggestStarted(state));

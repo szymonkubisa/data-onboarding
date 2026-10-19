@@ -66,6 +66,8 @@ export async function submitReview(store: WorkflowStoreApi): Promise<ReviewOutco
     current.actions.reviewNeedsChanges(response.issues);
     return "needs-changes";
   } catch (error) {
+    // A failure for decisions that no longer exist (new file, edited mapping) is not news.
+    if (store.getState().decisions !== decisionsAtSubmit) return "stale";
     store.getState().actions.reviewFailed(messageOf(error));
     return "error";
   }
