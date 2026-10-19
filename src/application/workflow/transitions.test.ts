@@ -55,7 +55,23 @@ describe("import transitions", () => {
     const busy = t.setCorrection(approved(), "r-0001", "email", "x@y.example");
     const consented = { ...busy, sampleConsent: true };
     const next = t.loadDataset(consented, datasetFrom([["A"], ["1"]]));
-    expect(next).toEqual({ ...initialState(), sampleConsent: true, dataset: next.dataset });
+    expect(next).toEqual({
+      ...initialState(),
+      sampleConsent: true,
+      dataset: next.dataset,
+      ai: { ...initialState().ai, requestId: busy.ai.requestId },
+    });
+  });
+
+  it("keeps the AI request counter growing across file changes and resets", () => {
+    const first = t.suggestStarted(t.loadDataset(initialState(), dataset));
+    const replaced = t.suggestStarted(t.loadDataset(first, datasetFrom([["A"], ["1"]])));
+    expect(replaced.ai.requestId).toBeGreaterThan(first.ai.requestId);
+    expect(t.suggestSucceeded(replaced, first.ai.requestId, response)).toBe(replaced);
+    expect(t.reset(replaced).ai.requestId).toBe(replaced.ai.requestId);
+    expect(t.setSchema({ ...replaced, schemaId: "x" as never }, "supplier").ai.requestId).toBe(
+      replaced.ai.requestId,
+    );
   });
 });
 
