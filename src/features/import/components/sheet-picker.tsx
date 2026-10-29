@@ -21,7 +21,7 @@ export function SheetPicker({
       className="rounded-card border bg-card p-5 sm:p-6"
     >
       <h2 id="sheet-picker-title" className="text-base font-medium">
-        Which sheet holds the suppliers?
+        Which sheet holds the customers?
       </h2>
       <p className="mt-1 text-sm text-muted-foreground">
         <span className="font-mono text-foreground">{fileName}</span> has {sheets.length} sheets

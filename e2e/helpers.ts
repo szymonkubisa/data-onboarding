@@ -19,7 +19,7 @@ export async function expectAccessible(page: Page, label: string) {
 export async function loadSample(page: Page) {
   await page.goto("/");
   await page.getByRole("button", { name: "Try with sample data" }).click();
-  await expect(page.getByText("suppliers-messy.csv").first()).toBeVisible();
+  await expect(page.getByText("customers-messy.csv").first()).toBeVisible();
 }
 
 /** Parse the CSV the app produced (RFC 4180, CRLF, optional BOM). */

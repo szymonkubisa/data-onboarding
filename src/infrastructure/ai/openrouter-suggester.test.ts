@@ -1,6 +1,6 @@
 import { FakeListChatModel } from "@langchain/core/utils/testing";
 import { describe, expect, it } from "vitest";
-import { supplierSchema } from "@/domain/schema/supplier";
+import { customerSchema } from "@/domain/schema/customer";
 import { getAiConfig, publicAiInfo } from "./config";
 import { maxTokensFor, OpenRouterSuggester } from "./openrouter-suggester";
 import { buildMappingUserPrompt } from "./prompts/mapping";
@@ -8,7 +8,7 @@ import { RateLimiter } from "./rate-limit";
 import type { SuggestInput } from "./suggester";
 
 const input: SuggestInput = {
-  schema: { id: "supplier", label: "Supplier", fields: supplierSchema.fields },
+  schema: { id: "customer", label: "Customer", fields: customerSchema.fields },
   columns: [
     {
       id: "c-001",

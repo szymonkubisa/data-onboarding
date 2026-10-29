@@ -1,9 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { runSupplier, VALID_SUPPLIER } from "../../../test/helpers/factories";
+import { runCustomer, VALID_CUSTOMER } from "../../../test/helpers/factories";
 import { pendingFixIds } from "./pipeline";
 
-const first = (rows: Record<string, string>[], overlays?: Parameters<typeof runSupplier>[1]) => {
-  const report = runSupplier(rows, overlays);
+const first = (rows: Record<string, string>[], overlays?: Parameters<typeof runCustomer>[1]) => {
+  const report = runCustomer(rows, overlays);
   const record = report.records[0];
   if (!record) throw new Error("no record");
   return { report, record, codes: record.issues.map((i) => i.code) };
@@ -11,7 +11,7 @@ const first = (rows: Record<string, string>[], overlays?: Parameters<typeof runS
 
 describe("runQualityPipeline", () => {
   it("passes a clean record", () => {
-    const { record } = first([{ ...VALID_SUPPLIER }]);
+    const { record } = first([{ ...VALID_CUSTOMER }]);
     expect(record.status).toBe("valid");
     expect(record.issues).toEqual([]);
     expect(record.applied).toEqual([]);
@@ -20,7 +20,7 @@ describe("runQualityPipeline", () => {
   it("applies and records auto transforms, keeping the original", () => {
     const { record } = first([
       {
-        ...VALID_SUPPLIER,
+        ...VALID_CUSTOMER,
         companyName: "  Acme   Ltd ",
         email: "Orders@ACME.example",
         country: " uk ",
@@ -42,7 +42,7 @@ describe("runQualityPipeline", () => {
   });
 
   it("treats null tokens as empty and then requires required fields", () => {
-    const { record, codes } = first([{ ...VALID_SUPPLIER, email: "N/A", phone: "-" }]);
+    const { record, codes } = first([{ ...VALID_CUSTOMER, email: "N/A", phone: "-" }]);
     expect(record.values.email).toBe("");
     expect(record.values.phone).toBe("");
     expect(codes).toEqual(["required-missing"]);
@@ -59,18 +59,18 @@ describe("runQualityPipeline", () => {
     [{ phone: "ask for Tom" }, "phone-has-letters", "warning"],
     [{ taxId: "gb 123 456 789" }, "tax-id-format", "warning"],
   ])("%j → %s (%s)", (patch, code, severity) => {
-    const { record, codes } = first([{ ...VALID_SUPPLIER, ...patch }]);
+    const { record, codes } = first([{ ...VALID_CUSTOMER, ...patch }]);
     expect(codes).toEqual([code]);
     expect(record.status).toBe(severity);
   });
 
   it("keeps unrecognised countries unchanged", () => {
-    const { record } = first([{ ...VALID_SUPPLIER, country: "Narnia" }]);
+    const { record } = first([{ ...VALID_CUSTOMER, country: "Narnia" }]);
     expect(record.values.country).toBe("Narnia");
   });
 
   it("proposes suggested fixes and applies them only when accepted", () => {
-    const rows = [{ ...VALID_SUPPLIER, website: "acme.example", taxId: "gb 123" }];
+    const rows = [{ ...VALID_CUSTOMER, website: "acme.example", taxId: "gb 123" }];
     const before = first(rows);
     const fixIds = pendingFixIds(before.report);
     expect(fixIds).toEqual(["r-0001:taxId:tax-id-format", "r-0001:website:url-missing-scheme"]);
@@ -90,7 +90,7 @@ describe("runQualityPipeline", () => {
   });
 
   it("overlays manual corrections, records them, and still normalizes the corrected value", () => {
-    const { record } = first([{ ...VALID_SUPPLIER, email: "broken" }], {
+    const { record } = first([{ ...VALID_CUSTOMER, email: "broken" }], {
       corrections: { "r-0001:email": " fixed@ACME.example " },
     });
     expect(record.values.email).toBe("fixed@acme.example");
@@ -104,10 +104,10 @@ describe("runQualityPipeline", () => {
   });
 
   it("flags duplicates across rows without merging anything", () => {
-    const report = runSupplier([
-      { ...VALID_SUPPLIER, taxId: "GB1" },
-      { ...VALID_SUPPLIER, companyName: "Other", email: "x@other.example", taxId: "gb1" },
-      { ...VALID_SUPPLIER, companyName: "Third", email: "z@third.example" },
+    const report = runCustomer([
+      { ...VALID_CUSTOMER, taxId: "GB1" },
+      { ...VALID_CUSTOMER, companyName: "Other", email: "x@other.example", taxId: "gb1" },
+      { ...VALID_CUSTOMER, companyName: "Third", email: "z@third.example" },
     ]);
     expect(report.records).toHaveLength(3);
     expect(report.duplicateGroups.map((g) => g.rowIds)).toEqual([["r-0001", "r-0002"]]);
@@ -119,26 +119,26 @@ describe("runQualityPipeline", () => {
 
   it("drops excluded rows from duplicate detection and from status counts", () => {
     const rows = [
-      { ...VALID_SUPPLIER, taxId: "GB1" },
-      { ...VALID_SUPPLIER, companyName: "Other", email: "x@o.example", taxId: "GB1" },
+      { ...VALID_CUSTOMER, taxId: "GB1" },
+      { ...VALID_CUSTOMER, companyName: "Other", email: "x@o.example", taxId: "GB1" },
     ];
-    const report = runSupplier(rows, { excludedRowIds: { "r-0002": true } });
+    const report = runCustomer(rows, { excludedRowIds: { "r-0002": true } });
     expect(report.duplicateGroups).toEqual([]);
     expect(report.records[1]?.excluded).toBe(true);
     expect(report.summary).toMatchObject({ total: 2, valid: 1, excluded: 1, duplicates: 0 });
   });
 
   it("is deterministic and never mutates its input", () => {
-    const rows = [{ ...VALID_SUPPLIER, country: "uk" }];
-    expect(runSupplier(rows)).toEqual(runSupplier(rows));
+    const rows = [{ ...VALID_CUSTOMER, country: "uk" }];
+    expect(runCustomer(rows)).toEqual(runCustomer(rows));
     expect(rows[0]?.country).toBe("uk");
   });
 
   it("summarizes counts by status and issue code", () => {
-    const report = runSupplier([
-      { ...VALID_SUPPLIER },
-      { ...VALID_SUPPLIER, email: "bad", companyName: "B" },
-      { ...VALID_SUPPLIER, country: "Narnia", companyName: "C", email: "c@c.example" },
+    const report = runCustomer([
+      { ...VALID_CUSTOMER },
+      { ...VALID_CUSTOMER, email: "bad", companyName: "B" },
+      { ...VALID_CUSTOMER, country: "Narnia", companyName: "C", email: "c@c.example" },
     ]);
     expect(report.summary).toMatchObject({
       total: 3,
@@ -152,9 +152,9 @@ describe("runQualityPipeline", () => {
 
 describe("previewField", () => {
   it("shows what a value becomes and what it would raise", async () => {
-    const { supplierSchema } = await import("../schema/supplier");
+    const { customerSchema } = await import("../schema/customer");
     const { previewField } = await import("./pipeline");
-    const field = (key: string) => supplierSchema.fields.find((f) => f.key === key)!;
+    const field = (key: string) => customerSchema.fields.find((f) => f.key === key)!;
     expect(previewField(field("country"), " uk ")).toEqual({
       from: " uk ",
       to: "United Kingdom",

@@ -6,17 +6,17 @@ test("XLSX upload with a sheet picker", async ({ page }) => {
   await page.goto("/");
   await page
     .getByLabel("Choose a CSV or Excel file")
-    .setInputFiles(join(__dirname, "../test/fixtures/suppliers.xlsx"));
+    .setInputFiles(join(__dirname, "../test/fixtures/customers.xlsx"));
 
   await expect(
-    page.getByRole("heading", { name: "Which sheet holds the suppliers?" }),
+    page.getByRole("heading", { name: "Which sheet holds the customers?" }),
   ).toBeVisible();
   await expectAccessible(page, "sheet picker");
-  await page.getByRole("button", { name: /Suppliers\s*41 rows/ }).click();
+  await page.getByRole("button", { name: /Customers\s*41 rows/ }).click();
 
-  await expect(page.getByText(/sheet “Suppliers” · 40 rows · 11 columns/)).toBeVisible();
+  await expect(page.getByText(/sheet “Customers” · 40 rows · 11 columns/)).toBeVisible();
   await expect(
-    page.getByText(/Imported sheet “Suppliers”\. The workbook has 2 sheets\./),
+    page.getByText(/Imported sheet “Customers”\. The workbook has 2 sheets\./),
   ).toBeVisible();
 
   await page.getByRole("link", { name: "Continue to mapping" }).click();
@@ -45,7 +45,7 @@ test("unsupported files are rejected with a clear message", async ({ page }) => 
 test("later steps redirect to the import step when nothing is loaded", async ({ page }) => {
   await page.goto("/validate");
   await expect(page).toHaveURL(/\/$/);
-  await expect(page.getByRole("heading", { name: "Import supplier data" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Import customer data" })).toBeVisible();
 });
 
 test("mobile layout keeps the flow usable", async ({ page }) => {

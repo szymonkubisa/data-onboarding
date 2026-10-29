@@ -27,7 +27,7 @@ beforeEach(() => {
 
 describe("POST /api/mapping/suggest", () => {
   it("returns heuristic suggestions in demo mode", async () => {
-    const response = await suggest(post({ schemaId: "supplier", profile }));
+    const response = await suggest(post({ schemaId: "customer", profile }));
     expect(response.status).toBe(200);
     const body = SuggestResponseSchema.parse(await response.json());
     expect(body).toMatchObject({ origin: "heuristic", fallbackReason: "demo-mode" });
@@ -36,18 +36,18 @@ describe("POST /api/mapping/suggest", () => {
 
   it.each([
     ["not json", undefined, "{", "invalid-json"],
-    ["missing profile", { schemaId: "supplier" }, undefined, "invalid-request"],
-    ["empty profile", { schemaId: "supplier", profile: [] }, undefined, "invalid-request"],
+    ["missing profile", { schemaId: "customer" }, undefined, "invalid-request"],
+    ["empty profile", { schemaId: "customer", profile: [] }, undefined, "invalid-request"],
     ["unknown schema", { schemaId: "invoice", profile }, undefined, "unknown-schema"],
     [
       "duplicate column ids",
-      { schemaId: "supplier", profile: [profile[0], profile[0]] },
+      { schemaId: "customer", profile: [profile[0], profile[0]] },
       undefined,
       "invalid-request",
     ],
     [
       "too many samples",
-      { schemaId: "supplier", profile, samples: { "c-001": ["a", "b", "c", "d"] } },
+      { schemaId: "customer", profile, samples: { "c-001": ["a", "b", "c", "d"] } },
       undefined,
       "invalid-request",
     ],
@@ -65,7 +65,7 @@ describe("POST /api/mapping/suggest", () => {
   it("logs counts, never values", async () => {
     const info = vi.spyOn(console, "info").mockImplementation(() => {});
     await suggest(
-      post({ schemaId: "supplier", profile, samples: { "c-002": ["secret@acme.example"] } }),
+      post({ schemaId: "customer", profile, samples: { "c-002": ["secret@acme.example"] } }),
     );
     const logged = info.mock.calls.map((c) => String(c[0])).join("\n");
     expect(logged).toContain('"event":"mapping.suggest"');
@@ -77,7 +77,7 @@ describe("POST /api/mapping/suggest", () => {
 describe("POST /api/mapping/review", () => {
   it("approves a complete mapping on the same instance", async () => {
     const started = SuggestResponseSchema.parse(
-      await (await suggest(post({ schemaId: "supplier", profile }))).json(),
+      await (await suggest(post({ schemaId: "customer", profile }))).json(),
     );
     const decisions = started.suggestions.map((s) => ({
       sourceColumnId: s.sourceColumnId,
@@ -87,7 +87,7 @@ describe("POST /api/mapping/review", () => {
     const response = await review(
       post({
         threadId: started.threadId,
-        schemaId: "supplier",
+        schemaId: "customer",
         decisions,
         suggestions: started.suggestions,
         profile,
@@ -101,7 +101,7 @@ describe("POST /api/mapping/review", () => {
     const response = await review(
       post({
         threadId: "never-seen",
-        schemaId: "supplier",
+        schemaId: "customer",
         decisions: [{ sourceColumnId: "c-001", targetField: "companyName", status: "accepted" }],
         suggestions: [],
         profile,
@@ -118,7 +118,7 @@ describe("POST /api/mapping/review", () => {
     const response = await review(
       post({
         threadId: "x",
-        schemaId: "supplier",
+        schemaId: "customer",
         decisions: [{ sourceColumnId: 1 }],
         suggestions: [],
         profile,

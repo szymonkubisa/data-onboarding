@@ -1,11 +1,11 @@
 /**
- * Generates the demo data: a messy but realistic supplier export.
+ * Generates the demo data: a messy but realistic customer export.
  *
  *   pnpm generate:sample
  *
  * Outputs (deterministic, seeded RNG):
- *   public/samples/suppliers-messy.csv   184 rows, the "Try with sample data" file
- *   test/fixtures/suppliers.xlsx         2 sheets, used by parser tests and e2e
+ *   public/samples/customers-messy.csv   184 rows, the "Try with sample data" file
+ *   test/fixtures/customers.xlsx         2 sheets, used by parser tests and e2e
  *
  * All data is synthetic. Domains use reserved TLD-like suffixes per country but the
  * company names are generated, not real.
@@ -223,16 +223,16 @@ const LAST = [
   "Wójcik",
 ];
 const SEGMENTS = [
-  "Packaging",
+  "Manufacturing",
   "Logistics",
-  "Raw materials",
-  "Electronics",
-  "Services",
-  "Office supplies",
+  "Retail",
+  "Software",
+  "Professional services",
+  "Hospitality",
   "Food & beverage",
 ];
 const TERMS = ["30 days", "60 days", "Net 45", "Prepaid", "14 days"];
-const NOTES = ["", "", "", "Preferred", "Check credit limit", "New in 2026", "On hold"];
+const NOTES = ["", "", "", "Key account", "Check credit limit", "New in 2026", "On hold"];
 
 const slug = (name: string) =>
   name
@@ -243,7 +243,7 @@ const slug = (name: string) =>
     .replace(/^-|-$/g, "");
 
 const HEADERS = [
-  "Supplier Name",
+  "Customer Name",
   "VAT No.",
   "E-mail",
   "Tel.",
@@ -333,9 +333,9 @@ const special: [number, Row][] = [
       "Manchester",
       "M1 1AE",
       "UK",
-      "Packaging",
+      "Manufacturing",
       "",
-      "Preferred",
+      "Key account",
       "30 days",
     ],
   ],
@@ -353,7 +353,7 @@ const special: [number, Row][] = [
       "Manchester",
       "M1 1AE",
       "United Kingdom",
-      "Packaging",
+      "Manufacturing",
       "",
       "",
       "30 days",
@@ -373,7 +373,7 @@ const special: [number, Row][] = [
       "Leeds",
       "LS2 7EX",
       "GB",
-      "Office supplies",
+      "Retail",
       "",
       "",
       "Net 45",
@@ -392,7 +392,7 @@ const special: [number, Row][] = [
       "",
       "",
       "Germany",
-      "Services",
+      "Professional services",
       "",
       "Check credit limit",
       "Prepaid",
@@ -411,7 +411,7 @@ const special: [number, Row][] = [
       "Berlin",
       "10115",
       "Deutschland",
-      "Office supplies",
+      "Retail",
       "",
       "",
       "60 days",
@@ -431,7 +431,7 @@ const special: [number, Row][] = [
       "Warszawa",
       "00-850",
       "Polska",
-      "Raw materials",
+      "Manufacturing",
       "",
       "",
       "14 days",
@@ -469,7 +469,7 @@ const special: [number, Row][] = [
       "Glasgow",
       "G2 1AA",
       "",
-      "Raw materials",
+      "Manufacturing",
       "",
       "",
       "60 days",
@@ -562,7 +562,7 @@ rows.splice(100, 0, Array(HEADERS.length).fill(""));
 const isData = (r: Row) => r.some((c) => c !== "");
 
 const csv = Papa.unparse({ fields: HEADERS, data: rows }, { newline: "\r\n", quotes: false });
-const csvPath = join(ROOT, "public/samples/suppliers-messy.csv");
+const csvPath = join(ROOT, "public/samples/customers-messy.csv");
 mkdirSync(dirname(csvPath), { recursive: true });
 writeFileSync(csvPath, `﻿${csv}\r\n`, "utf8");
 
@@ -585,13 +585,13 @@ const xlsxRows = rows
   .slice(0, 40)
   .map((r) => r.slice(0, 11));
 
-const xlsxPath = join(ROOT, "test/fixtures/suppliers.xlsx");
+const xlsxPath = join(ROOT, "test/fixtures/customers.xlsx");
 mkdirSync(dirname(xlsxPath), { recursive: true });
 await writeXlsxFile([
-  { sheet: "Suppliers", data: [xlsxHeaders, ...xlsxRows] },
+  { sheet: "Customers", data: [xlsxHeaders, ...xlsxRows] },
   {
     sheet: "Read me",
-    data: [["Exported from the procurement system."], ["Do not edit the Suppliers sheet by hand."]],
+    data: [["Exported from the procurement system."], ["Do not edit the Customers sheet by hand."]],
   },
 ]).toFile(xlsxPath);
 

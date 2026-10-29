@@ -10,7 +10,7 @@ import { DecisionTable } from "./decision-table";
 import { FieldCoverage } from "./field-coverage";
 
 const dataset = datasetFrom([
-  ["Supplier", "Mail", "Land", "Notes"],
+  ["Customer", "Mail", "Land", "Notes"],
   ["Acme Ltd", "a@acme.example", "UK", "x"],
 ]);
 
@@ -67,8 +67,8 @@ function setup() {
 describe("decision table", () => {
   it("shows each suggestion with its confidence bucket", () => {
     const { row } = setup();
-    expect(within(row("Supplier")).getByRole("combobox")).toHaveTextContent("Company name");
-    expect(within(row("Supplier")).getByLabelText(/High confidence, 95%/)).toBeInTheDocument();
+    expect(within(row("Customer")).getByRole("combobox")).toHaveTextContent("Company name");
+    expect(within(row("Customer")).getByLabelText(/High confidence, 95%/)).toBeInTheDocument();
     expect(within(row("Land")).getByLabelText(/Medium confidence, 55%/)).toBeInTheDocument();
   });
 

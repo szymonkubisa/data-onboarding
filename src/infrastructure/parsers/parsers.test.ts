@@ -6,7 +6,7 @@ import { detectFileType, parseFile, precheckFile } from "./parse-file";
 import { readWorkbook } from "./xlsx";
 
 const FIXTURES = join(process.cwd(), "test/fixtures");
-const SAMPLE = join(process.cwd(), "public/samples/suppliers-messy.csv");
+const SAMPLE = join(process.cwd(), "public/samples/customers-messy.csv");
 
 const fileFrom = (content: BlobPart, name: string, type = "") =>
   Object.assign(new Blob([content], { type }), { name });
@@ -70,7 +70,7 @@ describe("precheckFile", () => {
 
 describe("parseFile", () => {
   it("parses the sample CSV into the documented shape", async () => {
-    const outcome = await parseFile(fileFrom(readFileSync(SAMPLE), "suppliers-messy.csv"), "id-1");
+    const outcome = await parseFile(fileFrom(readFileSync(SAMPLE), "customers-messy.csv"), "id-1");
     expect(outcome.kind).toBe("dataset");
     if (outcome.kind !== "dataset") return;
     const { dataset } = outcome;
@@ -86,19 +86,19 @@ describe("parseFile", () => {
 
   it("asks for a sheet when the workbook has several, then builds from the chosen one", async () => {
     const outcome = await parseFile(
-      fileFrom(readFileSync(join(FIXTURES, "suppliers.xlsx")), "suppliers.xlsx"),
+      fileFrom(readFileSync(join(FIXTURES, "customers.xlsx")), "customers.xlsx"),
       "id-2",
     );
     expect(outcome.kind).toBe("choose-sheet");
     if (outcome.kind !== "choose-sheet") return;
     expect(outcome.sheets).toEqual([
-      { name: "Suppliers", nonEmptyRows: 41 },
+      { name: "Customers", nonEmptyRows: 41 },
       { name: "Read me", nonEmptyRows: 2 },
     ]);
-    const picked = outcome.pick("Suppliers");
+    const picked = outcome.pick("Customers");
     expect(picked.ok).toBe(true);
     if (!picked.ok) return;
-    expect(picked.dataset).toMatchObject({ fileType: "xlsx", sheetName: "Suppliers" });
+    expect(picked.dataset).toMatchObject({ fileType: "xlsx", sheetName: "Customers" });
     expect(picked.dataset.rows).toHaveLength(40);
     expect(picked.dataset.columns[0]?.name).toBe("Company");
     expect(picked.dataset.warnings.map((w) => w.code)).toContain("multiple-sheets");
@@ -114,7 +114,7 @@ describe("readWorkbook", () => {
   it("reads an ArrayBuffer holding exactly the file's bytes", async () => {
     // A Node Buffer's .buffer is the backing store, which can be larger than the file and
     // start at an offset; hand the parser only the file's own bytes, as the browser does.
-    const file = readFileSync(join(FIXTURES, "suppliers.xlsx"));
+    const file = readFileSync(join(FIXTURES, "customers.xlsx"));
     const bytes = file.buffer.slice(
       file.byteOffset,
       file.byteOffset + file.byteLength,
@@ -123,7 +123,7 @@ describe("readWorkbook", () => {
     expect(result.ok).toBe(true);
     if (!result.ok) return;
     expect(result.sheets.map((s) => [s.name, s.nonEmptyRows])).toEqual([
-      ["Suppliers", 41],
+      ["Customers", 41],
       ["Read me", 2],
     ]);
     expect(result.sheets[0]?.matrix[0]?.[0]).toBe("Company");

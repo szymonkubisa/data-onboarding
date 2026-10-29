@@ -6,7 +6,7 @@ import { useWorkflow } from "@/application/workflow/react";
 import { selectQualityReport } from "@/application/workflow/selectors";
 import { initialState } from "@/application/workflow/state";
 import * as t from "@/application/workflow/transitions";
-import { supplierSchema } from "@/domain/schema/supplier";
+import { customerSchema } from "@/domain/schema/customer";
 import { RecordsGrid } from "./records-grid";
 
 const dataset = datasetFrom([
@@ -30,7 +30,7 @@ function preloaded() {
 function Grid() {
   const report = useWorkflow(selectQualityReport);
   const corrections = useWorkflow((s) => s.corrections);
-  const fields = supplierSchema.fields.filter((f) =>
+  const fields = customerSchema.fields.filter((f) =>
     ["companyName", "email", "country", "website"].includes(f.key),
   );
   return (

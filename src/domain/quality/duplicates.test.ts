@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { supplierSchema } from "../schema/supplier";
+import { customerSchema } from "../schema/customer";
 import { companyKey, findDuplicateGroups } from "./duplicates";
 
 const record = (rowId: string, values: Record<string, string>) => ({ rowId, values });
@@ -28,7 +28,7 @@ describe("findDuplicateGroups", () => {
         record("r-5", { companyName: "Gamma", email: "b@beta.de" }),
         record("r-6", { companyName: "Unique Ltd", country: "France" }),
       ],
-      supplierSchema,
+      customerSchema,
     );
     expect(groups).toEqual([
       { id: "dup-r-1", rowIds: ["r-1", "r-2"], reasons: ["Same tax ID"] },
@@ -46,7 +46,7 @@ describe("findDuplicateGroups", () => {
         record("r-1", { companyName: "Acme", country: "" }),
         record("r-2", { companyName: "Acme", country: "" }),
       ],
-      supplierSchema,
+      customerSchema,
     );
     expect(groups).toEqual([]);
   });

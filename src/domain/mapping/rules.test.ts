@@ -1,6 +1,6 @@
 import { describe, expect, expectTypeOf, it } from "vitest";
 import { z } from "zod";
-import { supplierSchema } from "../schema/supplier";
+import { customerSchema } from "../schema/customer";
 import {
   buildApprovedMapping,
   confidenceBucket,
@@ -15,7 +15,7 @@ import { buildLlmOutputSchema } from "./schemas";
 import type { MappingDecision, MappingIssue, MappingSuggestion } from "./types";
 
 const columnIds = ["c-001", "c-002", "c-003", "c-004"];
-const fieldKeys = supplierSchema.fields.map((f) => f.key);
+const fieldKeys = customerSchema.fields.map((f) => f.key);
 const ctx = { columnIds, fieldKeys, origin: "llm" as const };
 
 const entry = (sourceColumnId: string, targetField: string | null, confidence = 0.9) => ({
@@ -143,7 +143,7 @@ describe("validateMapping", () => {
   it("passes a complete mapping", () => {
     const issues = validateMapping(
       [decision("c-001", "companyName"), decision("c-002", "email"), decision("c-003", "country")],
-      supplierSchema,
+      customerSchema,
       columnIds,
     );
     expect(issues).toEqual([]);
@@ -157,7 +157,7 @@ describe("validateMapping", () => {
         decision("c-003", "nope"),
         decision("c-404", "city"),
       ],
-      supplierSchema,
+      customerSchema,
       columnIds,
     );
     expect(issues).toEqual(
@@ -180,7 +180,7 @@ describe("validateMapping", () => {
   it("ignored columns do not count as mapped", () => {
     const issues = validateMapping(
       [decision("c-001", "companyName", "ignored")],
-      supplierSchema,
+      customerSchema,
       columnIds,
     );
     expect(issues).toContainEqual({
@@ -205,7 +205,7 @@ describe("validateMapping", () => {
       decision("c-002", "email"),
       decision("c-003", "country"),
     ];
-    const issues = validateMapping(decisions, supplierSchema, columnIds, suggestions);
+    const issues = validateMapping(decisions, customerSchema, columnIds, suggestions);
     expect(issues).toEqual([
       {
         kind: "low-confidence",
@@ -219,7 +219,7 @@ describe("validateMapping", () => {
 
     const accepted = validateMapping(
       [decision("c-001", "companyName", "accepted"), ...decisions.slice(1)],
-      supplierSchema,
+      customerSchema,
       columnIds,
       suggestions,
     );
@@ -250,7 +250,7 @@ describe("decisions → approved mapping", () => {
         { sourceColumnId: "c-002", targetField: "city", status: "ignored" },
         { sourceColumnId: "c-003", targetField: "country", status: "modified" },
       ],
-      "supplier",
+      "customer",
     );
     expect(approved.fieldToColumn).toEqual({ email: "c-001", country: "c-003" });
     expect(approved.decisions.map((d) => d.status)).toEqual(["accepted", "ignored", "modified"]);
@@ -263,7 +263,7 @@ describe("decisions → approved mapping", () => {
         { sourceColumnId: "c-002", targetField: "email", status: "accepted" },
         { sourceColumnId: "c-003", targetField: "city", status: "accepted" },
       ],
-      supplierSchema,
+      customerSchema,
     );
     expect(summary).toMatchObject({
       mappedFields: 2,
