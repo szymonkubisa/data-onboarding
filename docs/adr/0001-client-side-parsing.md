@@ -5,7 +5,7 @@
 
 ## Context
 
-Supplier files contain personal and commercial data: contact names, emails, phone numbers, tax IDs. The app has to run as a demo on Vercel without a database. Vercel serverless functions cap request bodies at 4.5 MB, and anything uploaded to a function also passes through its logs, memory and any observability tooling attached to it.
+Customer files contain personal and commercial data: contact names, emails, phone numbers, tax IDs. The app has to run as a demo on Vercel without a database. Vercel serverless functions cap request bodies at 4.5 MB, and anything uploaded to a function also passes through its logs, memory and any observability tooling attached to it.
 
 The only server-side step that needs to see the file at all is the AI mapping suggestion, and that step needs to know what the columns _are_, not what they _contain_.
 

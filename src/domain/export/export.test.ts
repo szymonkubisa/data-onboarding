@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { runSupplier, supplierDataset, VALID_SUPPLIER } from "../../../test/helpers/factories";
-import { supplierSchema } from "../schema/supplier";
+import { runCustomer, customerDataset, VALID_CUSTOMER } from "../../../test/helpers/factories";
+import { customerSchema } from "../schema/customer";
 import { buildExport, DEFAULT_EXPORT_OPTIONS } from "./build-export";
 import { escapeFormula, needsFormulaEscape } from "./formula";
 import { buildExportReport } from "./report";
@@ -28,16 +28,16 @@ describe("formula escaping", () => {
 
 describe("buildExport", () => {
   const rows = [
-    { ...VALID_SUPPLIER },
-    { ...VALID_SUPPLIER, companyName: "Warn Co", email: "w@w.example", country: "Narnia" },
-    { ...VALID_SUPPLIER, companyName: "Err Co", email: "broken" },
-    { ...VALID_SUPPLIER, companyName: "Excluded Co", email: "e@e.example" },
+    { ...VALID_CUSTOMER },
+    { ...VALID_CUSTOMER, companyName: "Warn Co", email: "w@w.example", country: "Narnia" },
+    { ...VALID_CUSTOMER, companyName: "Err Co", email: "broken" },
+    { ...VALID_CUSTOMER, companyName: "Excluded Co", email: "e@e.example" },
   ];
 
   it("leaves out error rows by default and lists every exclusion with a reason", () => {
-    const report = runSupplier(rows, { excludedRowIds: { "r-0004": true } });
-    const plan = buildExport(report, supplierSchema, DEFAULT_EXPORT_OPTIONS);
-    expect(plan.columns).toEqual(supplierSchema.fields.map((f) => f.key));
+    const report = runCustomer(rows, { excludedRowIds: { "r-0004": true } });
+    const plan = buildExport(report, customerSchema, DEFAULT_EXPORT_OPTIONS);
+    expect(plan.columns).toEqual(customerSchema.fields.map((f) => f.key));
     expect(plan.includedRowIds).toEqual(["r-0001", "r-0002"]);
     expect(plan.excluded).toEqual([
       { rowId: "r-0003", sourceRowNumber: 4, reason: "has-errors" },
@@ -53,8 +53,8 @@ describe("buildExport", () => {
   });
 
   it("includes error rows only when asked, and counts them", () => {
-    const report = runSupplier(rows);
-    const plan = buildExport(report, supplierSchema, {
+    const report = runCustomer(rows);
+    const plan = buildExport(report, customerSchema, {
       ...DEFAULT_EXPORT_OPTIONS,
       includeErrorRows: true,
     });
@@ -63,8 +63,8 @@ describe("buildExport", () => {
   });
 
   it("exports final values in schema field order", () => {
-    const report = runSupplier([{ ...VALID_SUPPLIER, country: "uk", city: " Leeds " }]);
-    const plan = buildExport(report, supplierSchema, DEFAULT_EXPORT_OPTIONS);
+    const report = runCustomer([{ ...VALID_CUSTOMER, country: "uk", city: " Leeds " }]);
+    const plan = buildExport(report, customerSchema, DEFAULT_EXPORT_OPTIONS);
     const row = Object.fromEntries(plan.columns.map((c, i) => [c, plan.rows[0]?.[i]]));
     expect(row).toMatchObject({ country: "United Kingdom", city: "Leeds", phone: "" });
   });
@@ -73,15 +73,15 @@ describe("buildExport", () => {
 describe("buildExportReport", () => {
   it("records mapping provenance, changes, unresolved issues and exclusions", () => {
     const rows = [
-      { ...VALID_SUPPLIER, country: "uk" },
-      { ...VALID_SUPPLIER, companyName: "Err", email: "broken" },
+      { ...VALID_CUSTOMER, country: "uk" },
+      { ...VALID_CUSTOMER, companyName: "Err", email: "broken" },
     ];
-    const { dataset, mapping } = supplierDataset(rows);
-    const report = runSupplier(rows);
-    const plan = buildExport(report, supplierSchema, DEFAULT_EXPORT_OPTIONS);
+    const { dataset, mapping } = customerDataset(rows);
+    const report = runCustomer(rows);
+    const plan = buildExport(report, customerSchema, DEFAULT_EXPORT_OPTIONS);
     const json = buildExportReport({
       dataset,
-      schema: supplierSchema,
+      schema: customerSchema,
       mapping,
       suggestions: [
         {

@@ -1,4 +1,4 @@
-import { supplierSchema } from "./supplier";
+import { customerSchema } from "./customer";
 import type { FieldDefinition, FieldKey, TargetSchema } from "./types";
 
 /**
@@ -6,13 +6,13 @@ import type { FieldDefinition, FieldKey, TargetSchema } from "./types";
  * (and a field-kind rule in quality/ if it introduces a new kind).
  */
 const REGISTRY = {
-  supplier: supplierSchema,
+  customer: customerSchema,
 } as const satisfies Record<string, TargetSchema>;
 
 export type SchemaId = keyof typeof REGISTRY;
 
 export const SCHEMA_IDS = Object.keys(REGISTRY) as SchemaId[];
-export const DEFAULT_SCHEMA_ID: SchemaId = "supplier";
+export const DEFAULT_SCHEMA_ID: SchemaId = "customer";
 
 export function isSchemaId(value: string): value is SchemaId {
   return Object.hasOwn(REGISTRY, value);

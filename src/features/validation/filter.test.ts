@@ -1,15 +1,15 @@
 import { describe, expect, it } from "vitest";
-import { runSupplier, VALID_SUPPLIER } from "../../../test/helpers/factories";
+import { runCustomer, VALID_CUSTOMER } from "../../../test/helpers/factories";
 import { DEFAULT_FILTERS, filterRecords, statusCounts } from "./filter";
 
-const report = runSupplier(
+const report = runCustomer(
   [
-    { ...VALID_SUPPLIER },
-    { ...VALID_SUPPLIER, companyName: "Broken Mail", email: "nope" },
-    { ...VALID_SUPPLIER, companyName: "Odd Land", email: "x@odd.example", country: "Narnia" },
-    { ...VALID_SUPPLIER, companyName: "Twin", email: "t@twin.example", taxId: "GB1" },
-    { ...VALID_SUPPLIER, companyName: "Twin Two", email: "t2@twin.example", taxId: "gb1" },
-    { ...VALID_SUPPLIER, companyName: "Gone", email: "g@gone.example" },
+    { ...VALID_CUSTOMER },
+    { ...VALID_CUSTOMER, companyName: "Broken Mail", email: "nope" },
+    { ...VALID_CUSTOMER, companyName: "Odd Land", email: "x@odd.example", country: "Narnia" },
+    { ...VALID_CUSTOMER, companyName: "Twin", email: "t@twin.example", taxId: "GB1" },
+    { ...VALID_CUSTOMER, companyName: "Twin Two", email: "t2@twin.example", taxId: "gb1" },
+    { ...VALID_CUSTOMER, companyName: "Gone", email: "g@gone.example" },
   ],
   { excludedRowIds: { "r-0006": true } },
 );

@@ -1,10 +1,10 @@
 import { describe, expect, it } from "vitest";
 import type { ColumnProfile } from "../dataset/profile";
-import { SUPPLIER_FIELDS } from "../schema/supplier";
+import { CUSTOMER_FIELDS } from "../schema/customer";
 import { diceSimilarity, exactHeaderHits, matchName, suggestByHeuristics } from "./heuristics";
 
 const field = (key: string) => {
-  const f = SUPPLIER_FIELDS.find((x) => x.key === key);
+  const f = CUSTOMER_FIELDS.find((x) => x.key === key);
   if (!f) throw new Error(key);
   return f;
 };
@@ -33,8 +33,8 @@ describe("matchName", () => {
   });
 
   it("weakens a match when the header is qualified by an id-like token", () => {
-    const plain = matchName("Supplier", field("companyName"));
-    const qualified = matchName("Supplier ID", field("companyName"));
+    const plain = matchName("Customer", field("companyName"));
+    const qualified = matchName("Customer ID", field("companyName"));
     expect(plain?.score).toBeGreaterThan(0.9);
     expect(qualified?.score ?? 0).toBeLessThan(0.4);
   });
@@ -53,14 +53,14 @@ describe("diceSimilarity", () => {
 
 describe("suggestByHeuristics", () => {
   const columns = [
-    { id: "c-001", name: "Supplier Name" },
+    { id: "c-001", name: "Customer Name" },
     { id: "c-002", name: "E-mail", profile: profile({ email: 0.97 }) },
     { id: "c-003", name: "Contact", profile: profile({ email: 0.95 }) },
     { id: "c-004", name: "Land", profile: profile({ countryLike: 0.9 }) },
     { id: "c-005", name: "Col X", profile: profile({ url: 0.88 }) },
     { id: "c-006", name: "Internal notes" },
   ];
-  const suggestions = suggestByHeuristics(columns, SUPPLIER_FIELDS);
+  const suggestions = suggestByHeuristics(columns, CUSTOMER_FIELDS);
   const target = (id: string) => suggestions.find((s) => s.sourceColumnId === id)?.targetField;
 
   it("returns one suggestion per column, in order, all heuristic", () => {
@@ -95,7 +95,7 @@ describe("suggestByHeuristics", () => {
   });
 
   it("is deterministic", () => {
-    expect(suggestByHeuristics(columns, SUPPLIER_FIELDS)).toEqual(suggestions);
+    expect(suggestByHeuristics(columns, CUSTOMER_FIELDS)).toEqual(suggestions);
   });
 });
 
@@ -107,7 +107,7 @@ describe("exactHeaderHits", () => {
         { id: "b", name: "Contact email address" },
         { id: "c", name: "Zip" },
       ],
-      SUPPLIER_FIELDS,
+      CUSTOMER_FIELDS,
     );
     expect(hits).toEqual([
       { columnId: "a", field: "email" },

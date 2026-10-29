@@ -27,7 +27,7 @@ for (const viewport of VIEWPORTS) {
     const suffix = viewport.name;
 
     await page.goto("/");
-    await expect(page.getByRole("heading", { name: "Import supplier data" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Import customer data" })).toBeVisible();
     await shot(page, `1-import-empty-${suffix}`);
 
     await page.getByRole("button", { name: "Try with sample data" }).click();

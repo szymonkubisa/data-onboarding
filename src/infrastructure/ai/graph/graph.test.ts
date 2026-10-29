@@ -12,11 +12,11 @@ import { buildMappingGraph } from "./graph";
 import { resumeMapping, startMapping } from "./run";
 
 const dataset = datasetFrom([
-  ["Supplier", "Mail", "Land", "Internal ref"],
+  ["Customer", "Mail", "Land", "Internal ref"],
   ["Acme Ltd", "a@acme.example", "UK", "X1"],
   ["Beta GmbH", "b@beta.example", "DE", "X2"],
 ]);
-const request: SuggestRequest = { schemaId: "supplier", profile: profileColumns(dataset) };
+const request: SuggestRequest = { schemaId: "customer", profile: profileColumns(dataset) };
 
 const good = {
   mappings: [
@@ -24,7 +24,7 @@ const good = {
       sourceColumnId: "c-001",
       targetField: "companyName",
       confidence: 0.94,
-      reasoning: "Header says supplier.",
+      reasoning: "Header says customer.",
     },
     {
       sourceColumnId: "c-002",
@@ -116,7 +116,7 @@ describe("mapping graph", () => {
       graph,
       request: {
         threadId: "t-happy",
-        schemaId: "supplier",
+        schemaId: "customer",
         decisions: complete,
         suggestions: response.suggestions,
         profile: request.profile,
@@ -205,7 +205,7 @@ describe("mapping graph", () => {
     const { response } = await startMapping({ request, suggester, graph, threadId: "t-loop" });
     const base = {
       threadId: "t-loop",
-      schemaId: "supplier",
+      schemaId: "customer",
       suggestions: response.suggestions,
       profile: request.profile,
     };
@@ -249,7 +249,7 @@ describe("mapping graph", () => {
       graph: coldGraph,
       request: {
         threadId: "t-cold",
-        schemaId: "supplier",
+        schemaId: "customer",
         decisions: complete,
         suggestions: response.suggestions,
         profile: request.profile,
@@ -261,7 +261,7 @@ describe("mapping graph", () => {
       graph: freshGraph(),
       request: {
         threadId: "t-cold-2",
-        schemaId: "supplier",
+        schemaId: "customer",
         decisions: decisionsFrom({
           "c-001": "companyName",
           "c-002": null,
@@ -284,7 +284,7 @@ describe("mapping graph", () => {
         graph,
         request: {
           threadId: "t-bad",
-          schemaId: "supplier",
+          schemaId: "customer",
           decisions: [
             { sourceColumnId: "c-001", targetField: "email", status: "maybe" },
           ] as unknown as MappingDecision[],

@@ -5,7 +5,7 @@ import { expectAccessible, loadSample, parseCsv } from "./helpers";
 test("sample data: import → map → validate → fix → export", async ({ page }) => {
   // Import
   await page.goto("/");
-  await expect(page.getByRole("heading", { name: "Import supplier data" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Import customer data" })).toBeVisible();
   await expectAccessible(page, "import (empty)");
   await loadSample(page);
   await expect(page.getByText(/184 rows · 14 columns/).first()).toBeVisible();
@@ -65,7 +65,7 @@ test("sample data: import → map → validate → fix → export", async ({ pag
   const downloadPromise = page.waitForEvent("download");
   await page.getByRole("button", { name: "Download CSV" }).first().click();
   const download = await downloadPromise;
-  expect(download.suggestedFilename()).toBe("suppliers-messy-clean.csv");
+  expect(download.suggestedFilename()).toBe("customers-messy-clean.csv");
   const csv = await readFile((await download.path())!, "utf8");
   expect(csv.startsWith("﻿")).toBe(true);
 

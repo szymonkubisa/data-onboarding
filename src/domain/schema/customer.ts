@@ -2,10 +2,10 @@ import { z } from "zod";
 import type { FieldDefinition, TargetSchema } from "./types";
 
 /**
- * A supplier record as the downstream system expects it.
+ * A customer record as the downstream system expects it.
  * Empty optional fields are absent (not empty strings).
  */
-export const SupplierSchema = z.object({
+export const CustomerSchema = z.object({
   companyName: z.string().min(1),
   taxId: z.string().min(1).optional(),
   email: z.email(),
@@ -19,11 +19,11 @@ export const SupplierSchema = z.object({
   category: z.string().min(1).optional(),
 });
 
-export type Supplier = z.infer<typeof SupplierSchema>;
-export type SupplierFieldKey = keyof Supplier;
+export type Customer = z.infer<typeof CustomerSchema>;
+export type CustomerFieldKey = keyof Customer;
 
 /**
- * Field metadata. `satisfies Record<SupplierFieldKey, …>` makes the compiler reject a field
+ * Field metadata. `satisfies Record<CustomerFieldKey, …>` makes the compiler reject a field
  * that is missing here or that does not exist in the Zod schema. A unit test checks that
  * `required` matches the schema's optionality.
  *
@@ -32,16 +32,16 @@ export type SupplierFieldKey = keyof Supplier;
 const FIELDS = {
   companyName: {
     label: "Company name",
-    description: "Registered or trading name of the supplier.",
+    description: "Registered or trading name of the customer.",
     required: true,
     kind: "text",
     synonyms: [
       "company",
       "company name",
-      "supplier",
-      "supplier name",
-      "vendor",
-      "vendor name",
+      "customer",
+      "customer name",
+      "client",
+      "client name",
       "name",
       "business name",
       "legal name",
@@ -138,7 +138,7 @@ const FIELDS = {
   },
   contactName: {
     label: "Contact name",
-    description: "Person to contact at the supplier.",
+    description: "Person to contact at the customer.",
     required: false,
     kind: "text",
     synonyms: [
@@ -200,7 +200,7 @@ const FIELDS = {
   },
   country: {
     label: "Country",
-    description: "Country of the supplier's registered address.",
+    description: "Country of the customer's registered address.",
     required: true,
     kind: "country",
     synonyms: ["country", "country code", "country region", "nation", "kraj", "land", "pais"],
@@ -208,12 +208,12 @@ const FIELDS = {
   },
   category: {
     label: "Category",
-    description: "What the supplier provides, e.g. Packaging, Logistics.",
+    description: "Customer segment or industry, e.g. Retail, Logistics.",
     required: false,
     kind: "text",
     synonyms: [
       "category",
-      "supplier category",
+      "customer category",
       "type",
       "segment",
       "industry",
@@ -221,20 +221,20 @@ const FIELDS = {
       "kategoria",
       "branza",
     ],
-    example: "Packaging",
+    example: "Retail",
   },
-} satisfies Record<SupplierFieldKey, Omit<FieldDefinition<SupplierFieldKey>, "key">>;
+} satisfies Record<CustomerFieldKey, Omit<FieldDefinition<CustomerFieldKey>, "key">>;
 
-export const SUPPLIER_FIELDS: readonly FieldDefinition<SupplierFieldKey>[] = (
-  Object.keys(FIELDS) as SupplierFieldKey[]
+export const CUSTOMER_FIELDS: readonly FieldDefinition<CustomerFieldKey>[] = (
+  Object.keys(FIELDS) as CustomerFieldKey[]
 ).map((key) => ({ key, ...FIELDS[key] }));
 
-export const supplierSchema: TargetSchema<SupplierFieldKey> = {
-  id: "supplier",
-  label: "Supplier",
-  description: "Vendor master data: identity, contact, address.",
-  fields: SUPPLIER_FIELDS,
-  recordSchema: SupplierSchema,
+export const customerSchema: TargetSchema<CustomerFieldKey> = {
+  id: "customer",
+  label: "Customer",
+  description: "Customer accounts for a CRM: identity, contact, address.",
+  fields: CUSTOMER_FIELDS,
+  recordSchema: CustomerSchema,
   duplicateKeys: [
     { id: "tax-id", label: "Same tax ID", fields: ["taxId"] },
     { id: "email", label: "Same email", fields: ["email"] },

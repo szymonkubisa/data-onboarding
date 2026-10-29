@@ -30,6 +30,7 @@ export default defineConfig({
     // Always our own production build: a dev server or another app on the port would skew results.
     reuseExistingServer: false,
     timeout: 240_000,
-    env: { OPENROUTER_API_KEY: "" },
+    // PROMO_LIVE=1 (promo recording only) keeps the key from .env to show the real model.
+    env: process.env.PROMO_LIVE ? {} : { OPENROUTER_API_KEY: "" },
   },
 });

@@ -22,7 +22,7 @@ interface NameMatch {
   how: "exact" | "compact" | "phrase" | "token" | "fuzzy";
 }
 
-/** Header tokens that turn "Supplier" into "Supplier ID": a different thing. */
+/** Header tokens that turn "Customer" into "Customer ID": a different thing. */
 const QUALIFIER_TOKENS = new Set([
   "id",
   "ref",

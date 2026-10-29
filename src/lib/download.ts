@@ -12,7 +12,7 @@ export function downloadFile(fileName: string, content: string, mimeType: string
   setTimeout(() => URL.revokeObjectURL(url), 1_000);
 }
 
-/** "Suppliers Q3.xlsx" → "suppliers-q3-clean.csv". */
+/** "Customers Q3.xlsx" → "customers-q3-clean.csv". */
 export function exportFileName(sourceName: string, suffix: string, extension: string): string {
   const base =
     sourceName

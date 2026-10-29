@@ -40,7 +40,7 @@ function SampleCard({ onSample, disabled }: { onSample: () => void; disabled: bo
           No file at hand?
         </h2>
         <p className="mt-1 text-sm text-muted-foreground">
-          Load a deliberately messy export of 184 suppliers and walk through the whole flow.
+          Load a deliberately messy export of 184 customers and walk through the whole flow.
         </p>
         <ul className="mt-4 space-y-2 text-sm">
           {SAMPLE_TRAITS.map(({ icon: Icon, text }) => (
@@ -139,7 +139,7 @@ export function ImportStep() {
   return (
     <>
       <StepHeader
-        title="Import supplier data"
+        title="Import customer data"
         description="Start from a CSV or Excel export. The file is read in your browser; only column names and statistics are ever sent to the AI."
       />
       <ImportWorkspace />

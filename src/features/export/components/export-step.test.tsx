@@ -20,7 +20,7 @@ const dataset = datasetFrom(
     ['=HYPERLINK("http://x")', "evil@x.example", "DE"],
     ["Broken", "nope", "FR"],
   ],
-  "Suppliers Q3.csv",
+  "Customers Q3.csv",
 );
 
 function preloaded() {
@@ -67,7 +67,7 @@ describe("export step", () => {
     await user.click(screen.getByRole("button", { name: "Download JSON report" }));
 
     const [csv, report] = downloads;
-    expect(csv?.name).toBe("suppliers-q3-clean.csv");
+    expect(csv?.name).toBe("customers-q3-clean.csv");
     const lines = csv!.content.replace(/^﻿/, "").trim().split("\r\n");
     expect(lines[0]).toBe(
       "companyName,taxId,email,phone,website,contactName,addressLine,city,postalCode,country,category",
@@ -76,7 +76,7 @@ describe("export step", () => {
     expect(lines[2]).toMatch(/^"'=HYPERLINK\(""http:\/\/x""\)",/);
     expect(lines).toHaveLength(3);
 
-    expect(report?.name).toBe("suppliers-q3-report.json");
+    expect(report?.name).toBe("customers-q3-report.json");
     const json = JSON.parse(report!.content);
     expect(json.exclusions).toEqual([
       { rowId: "r-0003", sourceRowNumber: 4, reason: "has-errors" },

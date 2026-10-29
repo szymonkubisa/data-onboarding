@@ -1,11 +1,13 @@
 # Data Onboarding
 
-Import, map, validate and export supplier data from messy CSV and Excel files.
+Import, map, validate and export customer data from messy CSV and Excel files.
 **An AI model suggests how columns map to fields, a person approves, and deterministic code does everything else.**
 
-![Mapping step: suggested target, confidence and reason per column, with field coverage on the right](docs/screenshots/3-map-desktop.png)
+[![50-second walkthrough: import a messy CSV, review the suggested mapping, fix values, export](docs/promo/demo.gif)](docs/promo/demo.mp4)
 
-Supplier lists arrive as spreadsheets that never match the target system: `E-mail` vs `Kontakt`, `UK` vs `GBR`, `acme.com` without `https://`, the same company twice, a cell that Excel would run as a formula. This app takes such a file through four steps:
+[Full walkthrough (MP4)](docs/promo/demo.mp4) · [Stills, social card and post copy](docs/promo/README.md)
+
+Customer lists arrive as spreadsheets that never match the target system: `E-mail` vs `Kontakt`, `UK` vs `GBR`, `acme.com` without `https://`, the same company twice, a cell that Excel would run as a formula. This app takes such a file through four steps:
 
 | Step         | What happens                                                                                                                                                                                           |
 | ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
@@ -14,7 +16,7 @@ Supplier lists arrive as spreadsheets that never match the target system: `E-mai
 | **Validate** | Rules clean and check every value. Safe changes are applied and marked; meaning-changing ones are offered as one-click fixes. Edit cells, exclude rows, review possible duplicates.                    |
 | **Export**   | CSV in schema order, formula-injection safe, plus a JSON audit report of every decision, change, open issue and excluded row.                                                                          |
 
-There is a **“Try with sample data”** button: 184 deliberately messy suppliers.
+There is a **“Try with sample data”** button: 184 deliberately messy customers.
 
 ## How the AI is used (and where it is not)
 
@@ -54,6 +56,7 @@ To use a real model, copy `.env.example` to `.env.local` and set `OPENROUTER_API
 | `pnpm test`                         | Unit, integration and component tests (Vitest)                      |
 | `pnpm e2e`                          | Playwright against a production build in demo mode, with axe checks |
 | `pnpm screenshots`                  | Captures every step at 1440 px and 390 px into `docs/screenshots/`  |
+| `pnpm promo` / `pnpm promo:encode`  | Records the promo video and stills into `docs/promo/` (see there)   |
 | `pnpm generate:sample`              | Regenerates the seeded sample CSV and the XLSX test fixture         |
 
 ## Architecture
@@ -119,7 +122,7 @@ Every change is recorded with `from` and `to`. The source file is never modified
 | ---------------------- | ------------------------------------------------------------------------------ | -------------------------------------------------------------------- |
 | Graph checkpoints      | Bounded in-memory `MemorySaver`, rehydrated from the client on a cold instance | `PostgresSaver` (one line in `checkpointer.ts`); drop rehydration    |
 | Rate limiting          | In-memory per instance, best effort                                            | Shared store (Redis) or platform firewall rules                      |
-| Auth, tenants, billing | None                                                                           | Required before handling real supplier data                          |
+| Auth, tenants, billing | None                                                                           | Required before handling real customer data                          |
 | Session persistence    | None: a reload starts over                                                     | Encrypted server-side storage with retention rules, if wanted at all |
 | AI mode                | Read at build/prerender time (Cache Components)                                | Same; changing the key needs a redeploy, as with any Vercel env var  |
 
@@ -129,7 +132,7 @@ Every change is recorded with `from` and `to`. The source file is never modified
 - Nothing is saved between reloads (by design: the data can be sensitive). Replacing a file you have worked on asks for confirmation.
 - Tables paginate instead of virtualizing; limits are 20 000 rows and 150 columns.
 - Phone numbers are checked for letters and length, not validated per country (no libphonenumber).
-- One target schema (Supplier). The registry supports more; there is no UI to pick between several yet.
+- One target schema (Customer). The registry supports more; there is no UI to pick between several yet.
 - Files must be UTF-8 (a hint appears when characters look mis-decoded). Legacy `.xls` is not supported.
 - On small screens the mapping and validation tables scroll horizontally.
 - Not deployed from this repository; the app is ready for Vercel (`pnpm build`, optional `OPENROUTER_API_KEY`).

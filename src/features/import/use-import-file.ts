@@ -7,8 +7,8 @@ import type { DatasetResult, SourceDataset } from "@/domain/dataset/types";
 import { parseFile, precheckFile, type SheetChoice } from "@/infrastructure/parsers/parse-file";
 
 export const SAMPLE_FILE = {
-  url: "/samples/suppliers-messy.csv",
-  name: "suppliers-messy.csv",
+  url: "/samples/customers-messy.csv",
+  name: "customers-messy.csv",
 } as const;
 
 export type ImportStatus =

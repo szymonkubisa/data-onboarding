@@ -2,7 +2,7 @@
  * CSV formula injection (CWE-1236) protection.
  *
  * Spreadsheet apps evaluate cells that start with = + - @ (and tab / carriage return).
- * A supplier called "=HYPERLINK(...)" or "-cmd|' /C calc'!A0" becomes active content
+ * A customer called "=HYPERLINK(...)" or "-cmd|' /C calc'!A0" becomes active content
  * when the export is opened in Excel. The standard mitigation is to prefix such cells
  * with a single quote, which Excel and Sheets display as text.
  *

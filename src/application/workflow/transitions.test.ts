@@ -47,7 +47,7 @@ function withSuggestions(): WorkflowState {
 
 function approved(): WorkflowState {
   const state = withSuggestions();
-  return t.reviewApproved(state, buildApprovedMapping(Object.values(state.decisions), "supplier"));
+  return t.reviewApproved(state, buildApprovedMapping(Object.values(state.decisions), "customer"));
 }
 
 describe("import transitions", () => {
@@ -69,7 +69,7 @@ describe("import transitions", () => {
     expect(replaced.ai.requestId).toBeGreaterThan(first.ai.requestId);
     expect(t.suggestSucceeded(replaced, first.ai.requestId, response)).toBe(replaced);
     expect(t.reset(replaced).ai.requestId).toBe(replaced.ai.requestId);
-    expect(t.setSchema({ ...replaced, schemaId: "x" as never }, "supplier").ai.requestId).toBe(
+    expect(t.setSchema({ ...replaced, schemaId: "x" as never }, "customer").ai.requestId).toBe(
       replaced.ai.requestId,
     );
   });

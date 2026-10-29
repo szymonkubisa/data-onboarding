@@ -17,7 +17,7 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Data Onboarding",
   description:
-    "Import, map, validate and export supplier data. AI suggests the column mapping, you approve it, deterministic code does the rest.",
+    "Import, map, validate and export customer data. AI suggests the column mapping, you approve it, deterministic code does the rest.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
