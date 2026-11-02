@@ -145,7 +145,6 @@ Every change is recorded with `from` and `to`. The source file is never modified
 - [x] Deterministic quality pipeline with visible changes, suggested fixes, edits, exclusions and duplicates
 - [x] Export CSV (formula-safe) and JSON audit report; nothing left out silently
 - [x] Zod at every boundary; framework-free domain (checked against the rules in `eslint.boundaries.mjs`)
-- [ ] Layer-boundary rules wired into `pnpm lint` (one import in `eslint.config.mjs`, pending approval)
 - [x] Unit, integration, component and e2e tests with axe; CI workflow
 - [x] Architecture document and ADRs
 

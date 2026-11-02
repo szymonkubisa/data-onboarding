@@ -1,5 +1,5 @@
 /**
- * Layer boundaries, enforced with `no-restricted-imports`.
+ * Layer boundaries, written as `no-restricted-imports` rules. Kept separate from `pnpm lint`.
  *
  * Direction of dependencies:
  *
