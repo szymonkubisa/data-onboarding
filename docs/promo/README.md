@@ -60,7 +60,7 @@ The recording runs in **demo mode**, so the suggestions come from heuristics and
 
 ### Post (Polski)
 
-> Zbudowałem Data Onboarding: narzędzie, które bierze nieuporządkowany arkusz z dostawcami i zamienia go w czysty plik do importu.
+> Zbudowałem Data Onboarding: narzędzie, które bierze nieuporządkowany arkusz z klientami i zamienia go w czysty plik do importu.
 >
 > Najważniejszy jest podział pracy. LLM robi to, w czym jest dobry: czyta nazwy i profile kolumn i podpowiada, że „Kontakt” to pole e-mail, razem z pewnością i uzasadnieniem. Człowiek zatwierdza. Wszystko dalej (walidacja, poprawki, wykrywanie duplikatów, eksport CSV odporny na formuły i pełny raport audytowy) to zwykły, deterministyczny kod.
 >

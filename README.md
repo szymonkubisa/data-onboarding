@@ -148,3 +148,7 @@ Every change is recorded with `from` and `to`. The source file is never modified
 - [ ] Layer-boundary rules wired into `pnpm lint` (one import in `eslint.config.mjs`, pending approval)
 - [x] Unit, integration, component and e2e tests with axe; CI workflow
 - [x] Architecture document and ADRs
+
+## License
+
+[MIT](LICENSE)
