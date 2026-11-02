@@ -32,7 +32,7 @@ app/(workspace) ─► features, components ─► application ─► contracts 
 app/api ─► contracts, infrastructure/ai ─► domain
 ```
 
-The rules live in [`eslint.boundaries.mjs`](../eslint.boundaries.mjs) as `no-restricted-imports` blocks (to be spread into `eslint.config.mjs`; the current code passes them): `domain/` may not import React, Next, LangChain, parsers, Zustand or any outer layer; `infrastructure/` may not import React or UI; `application/`, `features/` and `components/` may not import `infrastructure/ai` (which additionally starts with `import "server-only"`).
+The rules live in [`eslint.boundaries.mjs`](../eslint.boundaries.mjs) as `no-restricted-imports` blocks (kept separate from `pnpm lint`; the current code passes them): `domain/` may not import React, Next, LangChain, parsers, Zustand or any outer layer; `infrastructure/` may not import React or UI; `application/`, `features/` and `components/` may not import `infrastructure/ai` (which additionally starts with `import "server-only"`).
 
 ## Request flow
 

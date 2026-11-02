@@ -56,23 +56,11 @@ The recording runs in **demo mode**, so the suggestions come from heuristics and
 >
 > Next.js 16 · React 19 · LangGraph · OpenRouter · TanStack Table · Zod
 >
-> 50-second demo below.
-
-### Post (Polski)
-
-> Zbudowałem Data Onboarding: narzędzie, które bierze nieuporządkowany arkusz z dostawcami i zamienia go w czysty plik do importu.
->
-> Najważniejszy jest podział pracy. LLM robi to, w czym jest dobry: czyta nazwy i profile kolumn i podpowiada, że „Kontakt” to pole e-mail, razem z pewnością i uzasadnieniem. Człowiek zatwierdza. Wszystko dalej (walidacja, poprawki, wykrywanie duplikatów, eksport CSV odporny na formuły i pełny raport audytowy) to zwykły, deterministyczny kod.
->
-> Model nie widzi surowych wartości, chyba że na to pozwolisz. Bez bazy danych, działa na Vercelu.
->
-> Next.js 16 · React 19 · LangGraph · OpenRouter · TanStack Table · Zod
->
-> 50-sekundowe demo poniżej.
+> 50-second demo below. Code: https://github.com/szymonkubisa/data-onboarding
 
 ### Short post (X, Bluesky)
 
-> Messy customer CSV in, clean import file out. An LLM suggests the column mapping, you approve it, deterministic code validates and exports. Raw values stay private by default. Next.js 16 + LangGraph + OpenRouter.
+> Messy customer CSV in, clean import file out. An LLM suggests the column mapping, you approve it, deterministic code validates and exports. Raw values stay private by default. Next.js 16 + LangGraph + OpenRouter. https://github.com/szymonkubisa/data-onboarding
 
 ## Regenerating
 

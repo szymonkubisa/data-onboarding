@@ -2,6 +2,7 @@
   "name": "data-onboarding",
   "version": "0.1.0",
   "private": true,
+  "license": "MIT",
   "description": "Import, map, validate and export customer data. AI suggests the column mapping, a human approves it, deterministic code does the rest.",
   "scripts": {
     "dev": "next dev",
